@@ -1,3 +1,5 @@
+![download (2)](https://github.com/user-attachments/assets/7a056c26-0052-42f8-92da-a6e5e71eace0)
+
 # ⚡ Katana Agent
 
 **One command. Every AI agent. Centralized memory.**
@@ -21,7 +23,14 @@ katana memory init
 # 2. Open ~/.katana/memory/ in Obsidian (optional but powerful)
 
 # 3. Drop your agent into any project
-katana claude init
+katana init
+
+//or to set up for sepecific CLI agent
+katana [none, claude, gemini, codex, kilocode] init
+
+(each buildout is tailored to the specific CLI's default .agent folder structure)
+
+
 ```
 
 That's it. Your agent is ready with skills, commands, and centralized memory.
