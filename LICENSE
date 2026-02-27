@@ -1,0 +1,68 @@
+KATANA AGENT LICENSE
+Version 1.0, February 2026
+
+
+SUMMARY (in plain English):
+
+- Use it for free, personally or for learning? Go for it.
+- Fork it and build something cool? Great, just credit me.
+- Making money with it? Let's talk and work out a fair compensation.
+- Trying to copy-paste and sell it as your own? No.
+
+
+Copyright (c) 2026 Shane Swrld (github.com/shane9coy)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, merge, and distribute the Software, subject to the following
+conditions:
+
+1. ATTRIBUTION REQUIRED
+   All copies, forks, or derivative works must retain this license file,
+   the original copyright notice, and visible attribution to the original
+   author (Shane Swrld / Katana Agent) in any README, documentation, or
+   about page.
+
+2. NON-COMMERCIAL USE
+   The Software may be used freely for personal, educational, research,
+   and non-commercial purposes without restriction.
+
+3. COMMERCIAL USE
+   If the Software, or any substantial portion or derivative of it, is
+   incorporated into a product or service that generates revenue (including
+   but not limited to SaaS products, paid tools, consulting services, or
+   commercial distributions), the following applies:
+
+   a. You must notify the original author in writing prior to commercial
+      use (contact: github.com/shane9coy).
+
+   b. A revenue-sharing agreement must be established with the original
+      author. The default terms are 5% of gross revenue attributable to
+      the Software, unless a different arrangement is agreed upon in
+      writing.
+
+   c. If your total annual revenue from the product incorporating this
+      Software is under $1,000 USD, the revenue-sharing requirement is
+      waived, but attribution is still required.
+
+4. NO RESALE
+   You may not sell, sublicense, or redistribute the Software as a
+   standalone product (i.e., repackaging and selling it as-is or with
+   trivial modifications). Building on top of it is fine — selling a
+   copy of it is not.
+
+5. CONTRIBUTIONS
+   Any contributions submitted to the original repository (via pull
+   request or otherwise) are licensed under the same terms and become
+   part of the original project.
+
+6. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---

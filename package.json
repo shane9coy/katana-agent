@@ -1,0 +1,31 @@
+{
+  "name": "katana-agent",
+  "version": "1.0.0",
+  "description": "Katana Agent — Install your AI agent skills into any project. Self-hosted, private, model-agnostic.",
+  "author": "Shane Swrld (x.com/@shaneswrld_ | github.com/shane9coy)",
+  "license": "MIT",
+  "bin": {
+    "katana": "./bin/katana.js"
+  },
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "node --test tests/",
+    "link": "npm link"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "chalk": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "ai", "agent", "cli", "claude", "skills",
+    "kilocode", "cursor", "codex", "self-hosted",
+    "katana", "memory", "obsidian"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shane9coy/katana-agent"
+  }
+}
