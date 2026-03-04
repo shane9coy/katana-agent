@@ -1,0 +1,14 @@
+{
+  "model": "gemini-2.0-flash",
+  "enableSafetyFilter": true,
+  "sandbox": {
+    "enabled": true,
+    "dockerImage": "ubuntu:22.04"
+  },
+  "mcp": {
+    "enabled": true
+  },
+  "experimental": {
+    "multiAgent": false
+  }
+}

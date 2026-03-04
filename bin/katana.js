@@ -45,6 +45,17 @@ program
   });
 
 program
+  .command('gemini')
+  .description('Initialize .agents/ and .gemini/ folders for Gemini CLI')
+  .argument('[action]', 'Action to perform', 'init')
+  .option('--minimal', 'Only install core skills')
+  .option('--all', 'Install all skills and commands (skip picker)')
+  .action((action, opts) => {
+    if (action === 'init') require('../src/init/gemini').init(opts);
+    else console.log(chalk.red(`Unknown action: ${action}. Use: katana gemini init`));
+  });
+
+program
   .command('generic')
   .description('Initialize agent folder for Gemini, Cursor, Windsurf, self-hosted, etc.')
   .argument('[action]', 'Action to perform', 'init')
@@ -113,6 +124,7 @@ if (!process.argv.slice(2).length) {
   console.log(chalk.cyan('    katana claude init') + chalk.dim('      — .claude/ folder (Claude Code)'));
   console.log(chalk.cyan('    katana kilocode init') + chalk.dim('    — .kilocode/ folder (KiloCode)'));
   console.log(chalk.cyan('    katana codex init') + chalk.dim('       — .codex/ folder (OpenAI Codex)'));
+  console.log(chalk.cyan('    katana gemini init') + chalk.dim('      — .agents/ + .gemini/ (Gemini CLI)'));
   console.log(chalk.cyan('    katana generic init') + chalk.dim('     — .agent/ folder (Gemini, Cursor, Windsurf, etc.)'));
   console.log(chalk.cyan('    katana init') + chalk.dim('             — .katana/ folder (universal Katana format)'));
   console.log('');

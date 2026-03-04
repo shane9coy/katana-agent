@@ -3,7 +3,8 @@ const path = require('path');
 const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, MEMORY_DIR, COMMANDS_DIR } = require('../utils');
+const { pickInstallItems } = require('../picker');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR } = require('../utils');
 
 async function init(opts) {
   const folderName = opts.dir || '.agent';
@@ -37,32 +38,62 @@ async function init(opts) {
   // Copy generic template
   copyDirRecursive(templateDir, targetDir, { overwrite });
 
+  // Sync vault skills (with interactive picker unless --all or --minimal)
+  const categories = getVaultCategories();
+  const userCommands = getVaultCommands();
+  const vaultSkills = getVaultSkills();
+
+  let selectedCategories = categories.map(c => c.name);
+  let selectedCommands = userCommands.map(c => c.name);
+
+  if (opts.minimal) {
+    // --minimal: skip vault skills and commands, bundled only
+    selectedCategories = [];
+    selectedCommands = [];
+    console.log(chalk.dim('  → Minimal mode: bundled skills only'));
+  } else if (!opts.all && (categories.length > 0 || userCommands.length > 0)) {
+    // Interactive picker
+    const selections = await pickInstallItems(categories, userCommands);
+    selectedCategories = selections.categories;
+    selectedCommands = selections.commands;
+  } else if (opts.all) {
+    console.log(chalk.dim('  → All mode: installing everything'));
+  }
+
   // Copy commands from ~/.katana/commands/ (overrides bundled templates)
-  if (fs.existsSync(COMMANDS_DIR)) {
+  if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const commandsTarget = path.join(targetDir, 'commands');
     ensureDir(commandsTarget);
-    const userCommands = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.md'));
-    for (const file of userCommands) {
+    const userCommandsAll = fs.readdirSync(COMMANDS_DIR).filter(f => f.endsWith('.md'));
+    let commandCount = 0;
+    for (const file of userCommandsAll) {
+      const cmdName = file.replace('.md', '');
+      if (!selectedCommands.includes(cmdName)) continue;
       const dest = path.join(commandsTarget, file);
       if (!overwrite && fs.existsSync(dest)) continue;
       fs.copyFileSync(path.join(COMMANDS_DIR, file), dest);
+      commandCount++;
     }
-    if (userCommands.length > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${userCommands.length} command(s) from ~/.katana/commands/`));
+    if (commandCount > 0) {
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/.katana/commands/`));
     }
   }
 
-  // Sync vault skills
-  const vaultSkills = getVaultSkills();
-  if (vaultSkills.length > 0) {
+  // Install selected skill categories
+  if (selectedCategories.length > 0) {
     const skillsTarget = path.join(targetDir, 'skills');
     ensureDir(skillsTarget);
+    let skillCount = 0;
     for (const skill of vaultSkills) {
+      if (!selectedCategories.includes(skill.category)) continue;
       const dest = path.join(skillsTarget, skill.name);
       if (!overwrite && fs.existsSync(dest)) continue;
       copyDirRecursive(skill.path, dest, { overwrite: true });
+      skillCount++;
     }
-    console.log(chalk.green(`  ✓ Synced ${vaultSkills.length} skill(s) from Obsidian vault`));
+    if (skillCount > 0) {
+      console.log(chalk.green(`  ✓ Synced ${skillCount} skill(s) from Obsidian vault`));
+    }
   }
 
   // Generate AGENT.md (generic project memory file)
