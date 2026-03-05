@@ -56,7 +56,7 @@ async function init(opts) {
     console.log(chalk.dim('  → All mode: installing everything'));
   }
 
-  // Copy commands from ~/.katana/commands/
+  // Copy commands from ~/katana-agent/agent/commands/
   if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const agentsDir = path.join(targetDir, 'agents');
     ensureDir(agentsDir);
@@ -71,7 +71,7 @@ async function init(opts) {
       commandCount++;
     }
     if (commandCount > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${commandCount} agent(s) from ~/.katana/commands/`));
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} agent(s) from ~/katana-agent/agent/commands/`));
     }
   }
 
@@ -118,7 +118,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Agents:   ') + chalk.white(`${agentCount} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${skillCount} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/.katana/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
   console.log('');
 }
 
@@ -149,11 +149,11 @@ function generateAgentsMd(project) {
 ${project.stack}
 
 ## Agent
-This project uses **Katana Agent**. Memory: \`~/.katana/memory/\` (Obsidian vault).
+This project uses **Katana Agent**. Memory: \`~/katana-agent/agent/memory/\` (Obsidian vault).
 
 On session start, read:
-- \`~/.katana/memory/core/soul.md\` — agent identity
-- \`~/.katana/memory/core/user.md\` — user context
+- \`~/katana-agent/agent/memory/core/soul.md\` — agent identity
+- \`~/katana-agent/agent/memory/core/user.md\` — user context
 
 ## Conventions
 - (add your conventions here)

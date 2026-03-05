@@ -17,5 +17,5 @@ Each skill should be in its own folder with a `SKILL.md` file:
 
 ## Available Skills
 
-Skills are synced from `~/.katana/memory/skills/` during initialization.
+Skills are synced from `~/katana-agent/agent/memory/skills/` during initialization.
 Run `katana skills sync` to update.

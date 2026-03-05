@@ -16,9 +16,9 @@ description: "Store a memory from the current session. Triggered by /remember, '
 
 | Conversation contains... | Write to... |
 |--------------------------|-------------|
-| How the agent should behave | `~/.katana/memory/core/soul.md` → Learned Behaviors |
-| User preferences, goals, personal facts | `~/.katana/memory/core/user.md` → appropriate section |
-| Work done, code changes, decisions | `~/.katana/memory/work.md` → new entry at top |
+| How the agent should behave | `~/katana-agent/agent/memory/core/soul.md` → Learned Behaviors |
+| User preferences, goals, personal facts | `~/katana-agent/agent/memory/core/user.md` → appropriate section |
+| Work done, code changes, decisions | `~/katana-agent/agent/memory/work.md` → new entry at top |
 
 If session contains multiple types, write to multiple files.
 

@@ -1,13 +1,15 @@
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { execSync } = require('child_process');
 
 // ─── Paths ───────────────────────────────────────────────────
-const KATANA_HOME = path.join(os.homedir(), '.katana');
-const MEMORY_DIR = path.join(KATANA_HOME, 'memory');
-const VAULT_SKILLS_DIR = path.join(MEMORY_DIR, 'skills');
-const COMMANDS_DIR = path.join(KATANA_HOME, 'commands');
+// Resolve katana-agent repo root (works for npm link, global install, or local)
+const KATANA_ROOT = path.resolve(__dirname, '..');
+const AGENT_DIR = path.join(KATANA_ROOT, 'agent');
+const MEMORY_DIR = path.join(AGENT_DIR, 'memory');
+const VAULT_SKILLS_DIR = path.join(AGENT_DIR, 'skills');
+const COMMANDS_DIR = path.join(AGENT_DIR, 'commands');
+const SETTINGS_FILE = path.join(AGENT_DIR, 'settings.json');
 
 // ─── File Operations ─────────────────────────────────────────
 
@@ -149,10 +151,12 @@ function getVaultCommands() {
 }
 
 module.exports = {
-  KATANA_HOME,
+  KATANA_ROOT,
+  AGENT_DIR,
   MEMORY_DIR,
   VAULT_SKILLS_DIR,
   COMMANDS_DIR,
+  SETTINGS_FILE,
   copyDirRecursive,
   ensureDir,
   detectProjectStack,

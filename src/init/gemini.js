@@ -68,7 +68,7 @@ async function init(opts) {
 
   // Source priority: vault > bundled template
   const settingsSource = fs.existsSync(vaultSettingsPath) ? vaultSettingsPath : templateSettingsPath;
-  const sourceLabel = fs.existsSync(vaultSettingsPath) ? '~/.katana/memory/settings.json' : 'bundled default';
+  const sourceLabel = fs.existsSync(vaultSettingsPath) ? '~/katana-agent/agent/memory/settings.json' : 'bundled default';
 
   if (fs.existsSync(settingsPath) && action === 'merge') {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -250,7 +250,7 @@ __pycache__/
   console.log(chalk.dim('  .agents/skills:    ') + chalk.white(`${agentSkillsCount} installed`));
   console.log(chalk.dim('  .agents/agents:    ') + chalk.white(`${agentsAgentsCount} installed`));
   console.log(chalk.dim('  .gemini/commands:  ') + chalk.white(`${geminiCommandsCount} installed`));
-  console.log(chalk.dim('  Memory:            ') + chalk.white('~/.katana/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:            ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
   console.log('');
   console.log(chalk.dim('  Usage: Open this project in Gemini CLI — your agent is ready.'));
   console.log(chalk.dim('  Note: .agents/ takes precedence over .gemini/ for skills'));
@@ -265,12 +265,12 @@ ${project.stack}
 ${project.commands ? `\n## Available Commands\n${project.commands.split(', ').map(c => '- `' + c + '`').join('\n')}` : ''}
 
 ## Agent
-This project uses **Katana Agent**. Memory is stored in \`~/.katana/memory/\` (Obsidian vault).
+This project uses **Katana Agent**. Memory is stored in \`~/katana-agent/agent/memory/\` (Obsidian vault).
 
 On session start, read:
-- \`~/.katana/memory/core/soul.md\` — your identity and behavior
-- \`~/.katana/memory/core/user.md\` — facts about the user
-- Check \`~/.katana/memory/projects/${project.name}/\` for project history (if it exists)
+- \`~/katana-agent/agent/memory/core/soul.md\` — your identity and behavior
+- \`~/katana-agent/agent/memory/core/user.md\` — facts about the user
+- Check \`~/katana-agent/agent/memory/projects/${project.name}/\` for project history (if it exists)
 
 ## Code Conventions
 - (add your project conventions here)

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/.katana/memory/)",
+      "Write(~/.katana/memory/)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)"
+    ]
+  },
+  "env": {},
+  "mcpServers": {}
+}

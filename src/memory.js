@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { KATANA_HOME, MEMORY_DIR, ensureDir } = require('./utils');
+const { MEMORY_DIR, AGENT_DIR, ensureDir } = require('./utils');
 
 function status() {
   console.log('');
   console.log(chalk.bold('⚡ Katana Memory'));
-  console.log(chalk.dim(`  Vault: ${MEMORY_DIR}`));
+  console.log(chalk.dim(`  Vault: ~/katana-agent/agent/memory/`));
   console.log('');
 
   if (!fs.existsSync(MEMORY_DIR)) {
@@ -63,7 +63,7 @@ function status() {
   console.log(chalk.dim('  Projects:  ') + chalk.white(projectCount));
   console.log(chalk.dim('  Skills:    ') + chalk.white(skillCount));
   console.log('');
-  console.log(chalk.dim('  Open in Obsidian: ') + chalk.cyan(MEMORY_DIR));
+  console.log(chalk.dim('  Open in Obsidian: ~/katana-agent/agent/memory/'));
   console.log('');
 }
 
@@ -217,7 +217,7 @@ Auto-maintained by Katana Agent. Updated when skills are created or modified.
   }
 
   console.log('');
-  console.log(chalk.bold.green('  ✓ Memory vault ready at ' + MEMORY_DIR));
+  console.log(chalk.bold.green('  ✓ Memory vault ready at ~/katana-agent/agent/memory/'));
   console.log(chalk.dim('  Open this folder as an Obsidian vault to browse your agent\'s memory.'));
   console.log('');
 }

@@ -1,4 +1,8 @@
 node_modules/
 .DS_Store
 *.log
-.env
+agent/memory/.obsidian/
+agent/skills/**/.DS_Store
+agent/skills/**/__pycache__/
+agent/skills/**/*.pyc
+agent/skills/**/.env

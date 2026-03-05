@@ -1,0 +1,15 @@
+{
+  "post_id": "2023518214085571064",
+  "my_user_id": "2009983532026998785",
+  "campaign_name": "agent_architecture_skills_guide",
+
+  "keywords": ["skills", "skill"],
+
+  "dm_message": "Hey! This will take your agentic engineering skills to the next level🔥\n\nHere's the Agent Skills Architecture Guide:\n\n📄 PDF: [YOUR_PDF_LINK]\n📁 Repo: github.com/shane9coy/agent-skills-kit\n\nDrop a ⭐ on the repo if it helps!",
+
+  "follow_nudge": "@{username} Follow me to get the DM. Then comment 'skills' again 🤝",
+
+  "polling_interval_seconds": 600,
+  "pending_retry_delay_minutes": 60,
+  "max_results_per_poll": 100
+}

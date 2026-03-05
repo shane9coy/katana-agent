@@ -6,7 +6,7 @@ const { VAULT_SKILLS_DIR, getVaultSkills, copyDirRecursive, ensureDir } = requir
 function list() {
   console.log('');
   console.log(chalk.bold('⚡ Katana Skills'));
-  console.log(chalk.dim(`  Vault: ${VAULT_SKILLS_DIR}`));
+  console.log(chalk.dim(`  Vault: ~/katana-agent/agent/skills/`));
   console.log('');
 
   if (!fs.existsSync(VAULT_SKILLS_DIR)) {
@@ -19,7 +19,7 @@ function list() {
   if (skills.length === 0) {
     console.log(chalk.dim('  No skills in vault yet.'));
     console.log(chalk.dim('  Skills are created automatically when your agent solves complex problems,'));
-    console.log(chalk.dim('  or you can create them manually in ~/.katana/memory/skills/'));
+    console.log(chalk.dim('  or you can create them manually in ~/katana-agent/agent/skills/'));
     return;
   }
 

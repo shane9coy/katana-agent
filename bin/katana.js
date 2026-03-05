@@ -92,7 +92,7 @@ const memory = program.command('memory').description('Manage Katana memory vault
 
 memory
   .command('init')
-  .description('Initialize Obsidian memory vault at ~/.katana/memory/')
+  .description('Initialize Obsidian memory vault at ~/katana-agent/agent/memory/')
   .action(() => require('../src/memory').initVault());
 
 memory

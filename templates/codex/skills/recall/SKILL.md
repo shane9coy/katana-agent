@@ -19,10 +19,10 @@ description: "Search and retrieve memories. Triggered by /recall, 'what did we w
 
 | Question type | Search where |
 |--------------|-------------|
-| "What do you know about me?" | `~/.katana/memory/core/user.md` |
-| "How should you behave?" | `~/.katana/memory/core/soul.md` |
-| "What did we work on?" / project status | `~/.katana/memory/work.md` |
-| "What skills do we have?" | `~/.katana/memory/skills/_index.md` |
+| "What do you know about me?" | `~/katana-agent/agent/memory/core/user.md` |
+| "How should you behave?" | `~/katana-agent/agent/memory/core/soul.md` |
+| "What did we work on?" / project status | `~/katana-agent/agent/memory/work.md` |
+| "What skills do we have?" | `~/katana-agent/agent/memory/skills/_index.md` |
 | Unclear | Search all files |
 
 ### Search work.md
@@ -35,12 +35,12 @@ Summary of work done...
 Filter by project tag, date, or keyword.
 
 ### Search projects/
-Check `~/.katana/memory/projects/{name}/sessions.md` for project-specific history.
+Check `~/katana-agent/agent/memory/projects/{name}/sessions.md` for project-specific history.
 
 ### Full-text search
 For broad queries, use grep across all .md files:
 ```bash
-grep -r -i "search term" ~/.katana/memory/ --include="*.md"
+grep -r -i "search term" ~/katana-agent/agent/memory/ --include="*.md"
 ```
 
 ## Response Format

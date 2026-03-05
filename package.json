@@ -1,31 +1,38 @@
 {
   "name": "katana-agent",
-  "version": "1.0.0",
-  "description": "Katana Agent — Install your AI agent skills into any project. Self-hosted, private, model-agnostic.",
-  "author": "Shane Swrld (x.com/@shaneswrld_ | github.com/shane9coy)",
-  "license": "MIT",
+  "version": "1.1.0",
+  "description": "Install your AI agent into any project. Self-hosted, private, model-agnostic. Centralized Obsidian memory across Claude Code, Codex, Gemini, Cursor & more.",
+  "author": "Shane Swrld",
+  "license": "SEE LICENSE IN LICENSE",
+  "main": "src/utils.js",
   "bin": {
     "katana": "./bin/katana.js"
   },
-  "main": "src/cli.js",
+  "files": [
+    "bin/",
+    "src/",
+    "agent/",
+    "templates/",
+    "setup.sh",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "node --test tests/",
-    "link": "npm link"
-  },
-  "dependencies": {
-    "commander": "^12.0.0",
-    "chalk": "^4.1.2"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "test": "node bin/katana.js",
+    "setup": "bash setup.sh"
   },
   "keywords": [
-    "ai", "agent", "cli", "claude", "skills",
-    "kilocode", "cursor", "codex", "self-hosted",
-    "katana", "memory", "obsidian"
+    "ai-agent", "cli", "obsidian", "claude-code", "codex",
+    "cursor", "skills", "memory", "self-hosted", "developer-tools"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/shane9coy/katana-agent"
+    "url": "git+https://github.com/shane9coy/katana-agent.git"
+  },
+  "homepage": "https://github.com/shane9coy/katana-agent",
+  "engines": { "node": ">=18.0.0" },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0"
   }
 }

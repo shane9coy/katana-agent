@@ -4,7 +4,7 @@ const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
 const { pickInstallItems } = require('../picker');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR } = require('../utils');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, AGENT_DIR, SETTINGS_FILE } = require('../utils');
 
 async function init(opts) {
   const targetDir = path.join(process.cwd(), '.claude');
@@ -44,12 +44,8 @@ async function init(opts) {
 
   // ─── Settings.json Prompt ───────────────────────────────
   const settingsPath = path.join(targetDir, 'settings.json');
-  const vaultSettingsPath = path.join(MEMORY_DIR, 'settings.json');
-  const templateSettingsPath = path.join(templateDir, 'settings.json');
-
-  // Source priority: vault > bundled template
-  const settingsSource = fs.existsSync(vaultSettingsPath) ? vaultSettingsPath : templateSettingsPath;
-  const sourceLabel = fs.existsSync(vaultSettingsPath) ? '~/.katana/memory/settings.json' : 'bundled default';
+  const settingsSource = SETTINGS_FILE;
+  const sourceLabel = '~/katana-agent/agent/settings.json';
 
   if (fs.existsSync(settingsPath) && action === 'merge') {
     // Existing settings — ask before overwriting
@@ -105,7 +101,7 @@ async function init(opts) {
   }
 
   if (commandCount > 0) {
-    console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/.katana/commands/`));
+    console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/katana-agent/agent/commands/`));
   }
 
   // ─── Install Selected Skill Categories ──────────────────
@@ -159,7 +155,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Commands: ') + chalk.white(`${totalCommands} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${totalSkills} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/.katana/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
   console.log('');
   console.log(chalk.dim('  Usage: Open this project in Claude Code — your agent is ready.'));
   if (installedAgents.length > 0) {
@@ -177,12 +173,12 @@ ${project.stack}
 ${project.commands ? `\n## Available Commands\n${project.commands.split(', ').map(c => '- \`' + c + '\`').join('\n')}` : ''}
 
 ## Agent
-This project uses **Katana Agent**. Memory is stored in \`~/.katana/memory/\` (Obsidian vault).
+This project uses **Katana Agent**. Memory is stored in \`~/katana-agent/agent/memory/\` (Obsidian vault).
 
 On session start, read:
-- \`~/.katana/memory/core/soul.md\` — your identity and behavior
-- \`~/.katana/memory/core/user.md\` — facts about the user
-- Check \`~/.katana/memory/projects/${project.name}/\` for project history (if it exists)
+- \`~/katana-agent/agent/memory/core/soul.md\` — your identity and behavior
+- \`~/katana-agent/agent/memory/core/user.md\` — facts about the user
+- Check \`~/katana-agent/agent/memory/projects/${project.name}/\` for project history (if it exists)
 
 ## Code Conventions
 - (add your project conventions here)

@@ -55,7 +55,7 @@ async function init(opts) {
     console.log(chalk.dim('  → All mode: installing everything'));
   }
 
-  // Copy commands from ~/.katana/commands/
+  // Copy commands from ~/katana-agent/agent/commands/
   if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const commandsTarget = path.join(targetDir, 'commands');
     ensureDir(commandsTarget);
@@ -70,7 +70,7 @@ async function init(opts) {
       commandCount++;
     }
     if (commandCount > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/.katana/commands/`));
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/katana-agent/agent/commands/`));
     }
   }
 
@@ -102,7 +102,7 @@ agent: "master-agent"
 model: "anthropic"
 
 memory:
-  vault: "~/.katana/memory/"
+  vault: "~/katana-agent/agent/memory/"
   project: "${project.name}"
 `);
     console.log(chalk.green(`  ✓ Generated project.yaml (detected: ${project.stack})`));
@@ -122,7 +122,7 @@ memory:
   console.log('');
   console.log(chalk.dim('  Commands: ') + chalk.white(`${commandCount} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${skillCount} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/.katana/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
   console.log('');
 }
 

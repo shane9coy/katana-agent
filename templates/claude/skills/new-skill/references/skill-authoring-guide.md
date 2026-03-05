@@ -37,4 +37,4 @@ skill-name/
 - Claude Code: `.claude/skills/{name}/SKILL.md`
 - KiloCode: `.kilocode/skills/{name}/SKILL.md`
 - Codex: `.codex/skills/{name}/SKILL.md`
-- Katana Vault: `~/.katana/memory/skills/{category}/{name}/SKILL.md`
+- Katana Vault: `~/katana-agent/agent/memory/skills/{category}/{name}/SKILL.md`

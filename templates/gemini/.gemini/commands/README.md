@@ -10,4 +10,4 @@ Commands can be either:
 
 ## Available Commands
 
-Commands are synced from `~/.katana/commands/` during initialization.
+Commands are synced from `~/katana-agent/agent/commands/` during initialization.

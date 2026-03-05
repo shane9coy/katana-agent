@@ -60,7 +60,7 @@ async function init(opts) {
     console.log(chalk.dim('  → All mode: installing everything'));
   }
 
-  // Copy commands from ~/.katana/commands/ (overrides bundled templates)
+  // Copy commands from ~/katana-agent/agent/commands/ (overrides bundled templates)
   if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const commandsTarget = path.join(targetDir, 'commands');
     ensureDir(commandsTarget);
@@ -75,7 +75,7 @@ async function init(opts) {
       commandCount++;
     }
     if (commandCount > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/.katana/commands/`));
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/katana-agent/agent/commands/`));
     }
   }
 
@@ -121,7 +121,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Commands: ') + chalk.white(`${commandCount} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${skillCount} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/.katana/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
   console.log('');
   console.log(chalk.dim('  Point your agent to read AGENT.md on session start.'));
   console.log(chalk.dim('  All skills are standard SKILL.md format (AgentSkills spec).'));
@@ -139,21 +139,21 @@ ${project.commands ? `\n## Available Commands\n${project.commands.split(', ').ma
 This project uses **Katana Agent** with centralized Obsidian memory.
 
 ### Memory Vault Location
-All persistent memory lives at \`~/.katana/memory/\`. This is an Obsidian-compatible vault.
+All persistent memory lives at \`~/katana-agent/agent/memory/\`. This is an Obsidian-compatible vault.
 
 ### On Session Start
-1. Read \`~/.katana/memory/core/soul.md\` — your identity and behavior guidelines
-2. Read \`~/.katana/memory/core/user.md\` — facts about the user
-3. Read \`~/.katana/memory/core/routines.md\` — learned patterns and workflows
-4. Check \`~/.katana/memory/projects/${project.name}/\` for project-specific history
+1. Read \`~/katana-agent/agent/memory/core/soul.md\` — your identity and behavior guidelines
+2. Read \`~/katana-agent/agent/memory/core/user.md\` — facts about the user
+3. Read \`~/katana-agent/agent/memory/core/routines.md\` — learned patterns and workflows
+4. Check \`~/katana-agent/agent/memory/projects/${project.name}/\` for project-specific history
 
 ### Memory Commands
-- **Remember:** When user says "remember this" or session ends, summarize key decisions and append to \`~/.katana/memory/work.md\` (newest at top). Format: \`## YYYY-MM-DD — ${project.name}\`
-- **Recall:** When user asks about past work, search \`~/.katana/memory/work.md\` and \`~/.katana/memory/projects/\`
+- **Remember:** When user says "remember this" or session ends, summarize key decisions and append to \`~/katana-agent/agent/memory/work.md\` (newest at top). Format: \`## YYYY-MM-DD — ${project.name}\`
+- **Recall:** When user asks about past work, search \`~/katana-agent/agent/memory/work.md\` and \`~/katana-agent/agent/memory/projects/\`
 
 ### Skills
 Check \`./skills/\` directory for available skills. Each skill has a \`SKILL.md\` with instructions.
-Check \`~/.katana/memory/skills/_index.md\` for skills in the central vault.
+Check \`~/katana-agent/agent/memory/skills/_index.md\` for skills in the central vault.
 
 ## Code Conventions
 - (add your project conventions here)
@@ -161,7 +161,7 @@ Check \`~/.katana/memory/skills/_index.md\` for skills in the central vault.
 ## Notes
 - Skills use the AgentSkills spec (SKILL.md with YAML frontmatter)
 - Memory files use Obsidian-compatible markdown with [[wikilinks]] and #tags
-- Open \`~/.katana/memory/\` in Obsidian to browse your agent's brain
+- Open \`~/katana-agent/agent/memory/\` in Obsidian to browse your agent's brain
 `;
 }
 

@@ -14,7 +14,7 @@ Each agent is a markdown file with the agent's definition:
 ## Usage
 
 Sub-agents can be invoked using Gemini CLI's multi-agent features.
-Commands from `~/.katana/commands/` are automatically synced here.
+Commands from `~/katana-agent/agent/commands/` are automatically synced here.
 
 ## Synced Commands
 
