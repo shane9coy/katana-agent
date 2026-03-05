@@ -2,7 +2,7 @@
   "name": "katana-agent",
   "version": "1.1.0",
   "description": "Install your AI agent into any project. Self-hosted, private, model-agnostic. Centralized Obsidian memory across Claude Code, Codex, Gemini, Cursor & more.",
-  "author": "Shane Swrld",
+  "author": "x.com/shaneswrld_ | github.com/shane9coy",
   "license": "SEE LICENSE IN LICENSE",
   "main": "src/utils.js",
   "bin": {
