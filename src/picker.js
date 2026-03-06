@@ -1,16 +1,117 @@
 const readline = require('readline');
 const chalk = require('chalk');
+const figlet = require('figlet');
 
 /**
  * Interactive picker for skill categories and commands.
  * 
- * Shows checkboxes for each skill category folder and each command.
- * User enters numbers to toggle, 'a' for all, Enter to confirm.
+ * Uses radio button interface with arrow key navigation.
+ * "Select All" is the first option, mutually exclusive with individual selections.
  * 
  * @param {Array} categories - From getVaultCategories(): [{ name, skillCount, skills }]
  * @param {Array} commands - From getVaultCommands(): [{ name, path }]
  * @returns {Promise<{ categories: string[], commands: string[] }>} Selected category names and command names
  */
+
+const RADIO_UNSELECTED = '○';
+const RADIO_SELECTED = '●';
+
+function displayHeader() {
+  return new Promise((resolve) => {
+    figlet('Katana Inventory', { font: 'Standard' }, (err, data) => {
+      if (err) {
+        console.log(chalk.cyan('  ╔═══════════════════════════════╗'));
+        console.log(chalk.cyan('  ║    ') + chalk.bold.cyan('Katana Inventory') + chalk.cyan('    ║'));
+        console.log(chalk.cyan('  ╚═══════════════════════════════╝'));
+      } else {
+        console.log(chalk.cyan(data));
+      }
+      resolve();
+    });
+  });
+}
+
+/**
+ * Render a radio button list and handle user interaction
+ * @param {Array} items - Array of { label, value, description } objects
+ * @param {string} title - Section title to display
+ * @param {Function} rl - readline interface
+ * @param {Function} ask - question function
+ * @returns {Promise<string[]>} - Selected values (empty if "Select All" was selected)
+ */
+async function radioPick(items, title, rl, ask) {
+  if (items.length === 0) {
+    return [];
+  }
+
+  let selectedIndex = 0; // Default to first item ("Select All")
+
+  // Clear screen and render the menu
+  const render = () => {
+    console.clear();
+    displayHeader().then(() => {
+      console.log('');
+      console.log(chalk.bold.underline('  ' + title));
+      console.log('');
+      console.log(chalk.dim('  Use ↑/↓ arrows to navigate, Enter to confirm'));
+      console.log('');
+
+      items.forEach((item, i) => {
+        const isSelected = i === selectedIndex;
+        const radio = isSelected ? RADIO_SELECTED : RADIO_UNSELECTED;
+        
+        if (i === 0 && item.value === 'all') {
+          // "Select All" option
+          console.log(
+            chalk.cyan(`  ${radio}  `) +
+            chalk.white(item.label)
+          );
+        } else {
+          // Individual item
+          const desc = item.description ? chalk.dim(' — ' + item.description) : '';
+          console.log(
+            chalk.cyan(`  ${radio}  `) +
+            chalk.white(item.label) +
+            desc
+          );
+        }
+      });
+
+      console.log('');
+      console.log(chalk.dim('  Press Enter to confirm selection'));
+    });
+  };
+
+  // Set up raw mode for arrow key handling
+  return new Promise((resolve) => {
+    const onKeyPress = (key) => {
+      if (key === '\u001b[A') { // Up arrow
+        selectedIndex = Math.max(0, selectedIndex - 1);
+        render();
+      } else if (key === '\u001b[B') { // Down arrow
+        selectedIndex = Math.min(items.length - 1, selectedIndex + 1);
+        render();
+      } else if (key === '\r' || key === '\n') { // Enter
+        rl.input.removeListener('keypress', onKeyPress);
+        rl.close();
+        
+        // Determine selection based on radio button behavior
+        const selected = items[selectedIndex];
+        if (selected.value === 'all') {
+          // "Select All" - return all values
+          resolve(items.slice(1).map(item => item.value));
+        } else {
+          // Individual selection - return just that value
+          resolve([selected.value]);
+        }
+      }
+    };
+
+    rl.input.on('keypress', onKeyPress);
+    render();
+  });
+}
+
 async function pickInstallItems(categories, commands) {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -19,87 +120,82 @@ async function pickInstallItems(categories, commands) {
 
   const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
 
-  // ─── Skill Categories ─────────────────────────────────────
+  // ─── Figlet Header ─────────────────────────────────────────────
+  
+  await displayHeader();
 
-  let selectedCategories = categories.map(c => c.name); // default: all
+  // ─── Skill Categories ─────────────────────────────────────────
+
+  let selectedCategories = [];
 
   if (categories.length > 0) {
-    console.log('');
-    console.log(chalk.bold('  Skill Categories:'));
-    console.log('');
-
-    categories.forEach((cat, i) => {
-      const skillNames = cat.skills.length <= 4
-        ? cat.skills.join(', ')
-        : cat.skills.slice(0, 3).join(', ') + ` +${cat.skills.length - 3} more`;
-      console.log(
-        chalk.cyan(`    ${i + 1}.`) +
-        chalk.white(` ${cat.name}`) +
-        chalk.dim(` (${cat.skillCount} skill${cat.skillCount !== 1 ? 's' : ''})`) +
-        chalk.dim(` — ${skillNames}`)
-      );
-    });
+    // Build items array with "Select All" as first option
+    const categoryItems = [
+      { label: 'Select All', value: 'all', description: 'Install all skill categories' },
+      ...categories.map(cat => ({
+        label: cat.name,
+        value: cat.name,
+        description: `${cat.skillCount} skill${cat.skillCount !== 1 ? 's' : ''}`
+      }))
+    ];
 
     console.log('');
-    console.log(chalk.dim('    a = all, n = none, or enter numbers: 1,3,5'));
+    console.log(chalk.bold.underline('  Skill Categories'));
+    console.log('');
+    console.log(chalk.dim('  Use ↑/↓ to navigate, Enter to confirm'));
+    console.log(chalk.dim('  Selecting "Select All" will install all categories'));
     console.log('');
 
-    const answer = (await ask(chalk.white('  Install skill categories [a]: '))).trim().toLowerCase();
-
-    if (answer === 'n' || answer === 'none') {
-      selectedCategories = [];
-    } else if (answer !== '' && answer !== 'a' && answer !== 'all') {
-      const indices = answer.split(',')
-        .map(s => parseInt(s.trim()) - 1)
-        .filter(i => i >= 0 && i < categories.length);
-      selectedCategories = indices.map(i => categories[i].name);
-    }
-    // empty or 'a' → all (default)
+    const result = await radioPick(categoryItems, 'Skill Categories', rl, ask);
+    selectedCategories = result;
   }
 
-  // ─── Commands ──────────────────────────────────────────────
+  // ─── Commands ───────────────────────────────────────────────
 
-  let selectedCommands = commands.map(c => c.name); // default: all
+  let selectedCommands = [];
 
   if (commands.length > 0) {
+    // Build items array with "Select All" as first option
+    const commandItems = [
+      { label: 'Select All', value: 'all', description: 'Install all commands' },
+      ...commands.map(cmd => ({
+        label: '/' + cmd.name,
+        value: cmd.name,
+        description: null
+      }))
+    ];
+
+    console.clear();
+    await displayHeader();
+    
     console.log('');
-    console.log(chalk.bold('  Agent Commands:'));
+    console.log(chalk.bold.underline('  Agent Commands'));
+    console.log('');
+    console.log(chalk.dim('  Use ↑/↓ to navigate, Enter to confirm'));
+    console.log(chalk.dim('  Selecting "Select All" will install all commands'));
     console.log('');
 
-    commands.forEach((cmd, i) => {
-      console.log(chalk.cyan(`    ${i + 1}.`) + chalk.white(` /${cmd.name}`));
-    });
-
-    console.log('');
-    console.log(chalk.dim('    a = all, n = none, or enter numbers: 1,3'));
-    console.log('');
-
-    const answer = (await ask(chalk.white('  Install commands [a]: '))).trim().toLowerCase();
-
-    if (answer === 'n' || answer === 'none') {
-      selectedCommands = [];
-    } else if (answer !== '' && answer !== 'a' && answer !== 'all') {
-      const indices = answer.split(',')
-        .map(s => parseInt(s.trim()) - 1)
-        .filter(i => i >= 0 && i < commands.length);
-      selectedCommands = indices.map(i => commands[i].name);
-    }
+    const result = await radioPick(commandItems, 'Agent Commands', rl, ask);
+    selectedCommands = result;
   }
-
-  rl.close();
 
   // Summary
   const totalSkills = categories
     .filter(c => selectedCategories.includes(c.name))
     .reduce((sum, c) => sum + c.skillCount, 0);
 
+  console.clear();
+  await displayHeader();
+  
   if (selectedCategories.length > 0 || selectedCommands.length > 0) {
     console.log('');
+    console.log(chalk.bold.green('  ✓ Selection confirmed:'));
+    console.log('');
     if (selectedCategories.length > 0) {
-      console.log(chalk.dim(`  → Skills: ${selectedCategories.join(', ')} (${totalSkills} total)`));
+      console.log(chalk.white('  Skills: ') + chalk.cyan(selectedCategories.join(', ')) + chalk.dim(` (${totalSkills} total)`));
     }
     if (selectedCommands.length > 0) {
-      console.log(chalk.dim(`  → Commands: ${selectedCommands.map(c => '/' + c).join(', ')}`));
+      console.log(chalk.white('  Commands: ') + chalk.cyan(selectedCommands.map(c => '/' + c).join(', ')));
     }
   }
 

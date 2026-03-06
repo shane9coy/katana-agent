@@ -4,7 +4,7 @@ const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
 const { pickInstallItems } = require('../picker');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR } = require('../utils');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, SETTINGS_FILE } = require('../utils');
 
 async function init(opts) {
   const targetDir = path.join(process.cwd(), '.katana');
@@ -32,6 +32,30 @@ async function init(opts) {
 
   const overwrite = action !== 'merge';
   copyDirRecursive(templateDir, targetDir, { overwrite });
+
+  // ─── Settings.json Prompt ───────────────────────────────
+  const settingsPath = path.join(targetDir, 'settings.json');
+  const settingsSource = SETTINGS_FILE;
+  const sourceLabel = '~/katana-agent/agent/settings.json';
+
+  if (fs.existsSync(settingsPath) && action === 'merge') {
+    // Existing settings — ask before overwriting
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const answer = await new Promise(resolve => {
+      rl.question(chalk.white(`  Install settings.json from ${sourceLabel}? (y/N): `), resolve);
+    });
+    rl.close();
+
+    if (answer.trim().toLowerCase() === 'y') {
+      fs.copyFileSync(settingsSource, settingsPath);
+      console.log(chalk.green(`  ✓ Installed settings.json (${sourceLabel})`));
+    } else {
+      console.log(chalk.dim('  → Kept existing settings.json'));
+    }
+  } else if (!fs.existsSync(settingsPath) || overwrite) {
+    fs.copyFileSync(settingsSource, settingsPath);
+    console.log(chalk.green(`  ✓ Installed settings.json (${sourceLabel})`));
+  }
 
   // Sync vault skills (with interactive picker unless --all or --minimal)
   const categories = getVaultCategories();
