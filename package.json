@@ -22,15 +22,25 @@
     "setup": "bash setup.sh"
   },
   "keywords": [
-    "ai-agent", "cli", "obsidian", "claude-code", "codex",
-    "cursor", "skills", "memory", "self-hosted", "developer-tools"
+    "ai-agent",
+    "cli",
+    "obsidian",
+    "claude-code",
+    "codex",
+    "cursor",
+    "skills",
+    "memory",
+    "self-hosted",
+    "developer-tools"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shane9coy/katana-agent.git"
   },
   "homepage": "https://github.com/shane9coy/katana-agent",
-  "engines": { "node": ">=18.0.0" },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^12.1.0"
