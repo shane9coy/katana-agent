@@ -3,22 +3,27 @@ name: nano-banana-pro
 description: Generate/edit images with Nano Banana Pro (Gemini 3 Pro Image). Use for image create/modify requests incl. edits. Supports text-to-image + image-to-image; 1K/2K/4K; use --input-image.
 ---
 
+
+
+
 # Nano Banana Pro Image Generation & Editing
 
 Generate new images or edit existing ones using Google's Nano Banana Pro API (Gemini 3 Pro Image).
 
 ## Usage
 
+Note: ALWAYS default to 1k resolution
+
 Run the script using absolute path (do NOT cd to skill directory first):
 
 **Generate new image:**
 ```bash
-uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "your image description" --filename "output-name.png" [--resolution 1K|2K|4K] [--api-key KEY]
+uv run /Users/sc/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "your image description" --filename "output-name.png" [--resolution 1K|2K|4K] [--api-key KEY]
 ```
 
 **Edit existing image:**
 ```bash
-uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "editing instructions" --filename "output-name.png" --input-image "path/to/input.png" [--resolution 1K|2K|4K] [--api-key KEY]
+uv run ~/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "editing instructions" --filename "output-name.png" --input-image "path/to/input.png" [--resolution 1K|2K|4K] [--api-key KEY]
 ```
 
 **Important:** Always run from the user's current working directory so images are saved where the user is working, not in the skill directory.
@@ -28,11 +33,11 @@ uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "editi
 Goal: fast iteration without burning time on 4K until the prompt is correct.
 
 - Draft (1K): quick feedback loop
-  - `uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "<draft prompt>" --filename "yyyy-mm-dd-hh-mm-ss-draft.png" --resolution 1K`
+  - `uv run /Users/sc/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "<draft prompt>" --filename "yyyy-mm-dd-hh-mm-ss-draft.png" --resolution 1K`
 - Iterate: adjust prompt in small diffs; keep filename new per run
-  - If editing: keep the same `--input-image` for every iteration until you’re happy.
+  - If editing: keep the same `--input-image` for every iteration until you're happy.
 - Final (4K): only when prompt is locked
-  - `uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "<final prompt>" --filename "yyyy-mm-dd-hh-mm-ss-final.png" --resolution 4K`
+  - `uv run /Users/sc/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "<final prompt>" --filename "yyyy-mm-dd-hh-mm-ss-final.png" --resolution 4K`
 
 ## Resolution Options
 
@@ -53,20 +58,41 @@ Map user requests to API parameters:
 The script checks for API key in this order:
 1. `--api-key` argument (use if user provided key in chat)
 2. `GEMINI_API_KEY` environment variable
+3. `.env` file in project root (`/Users/sc/katana-agent/.env`)
 
 If neither is available, the script exits with an error message.
+
+### Setting up your API key
+
+**Option 1: .env file (Recommended)**
+Create a `.env` file in `/Users/sc/katana-agent/` with:
+```
+GEMINI_API_KEY=your-google-api-key-here
+```
+
+**Option 2: Environment variable**
+```bash
+export GEMINI_API_KEY="your-key"
+```
+
+**Option 3: Command-line argument**
+```bash
+--api-key "your-key"
+```
+
+The `.env` file is already in `.gitignore` so it won't be committed.
 
 ## Preflight + Common Failures (fast fixes)
 
 - Preflight:
   - `command -v uv` (must exist)
-  - `test -n \"$GEMINI_API_KEY\"` (or pass `--api-key`)
-  - If editing: `test -f \"path/to/input.png\"`
+  - `test -n "$GEMINI_API_KEY"` (or pass `--api-key`)
+  - If editing: `test -f "path/to/input.png"`
 
 - Common failures:
   - `Error: No API key provided.` → set `GEMINI_API_KEY` or pass `--api-key`
   - `Error loading input image:` → wrong path / unreadable file; verify `--input-image` points to a real image
-  - “quota/permission/403” style API errors → wrong key, no access, or quota exceeded; try a different key/account
+  - "quota/permission/403" style API errors → wrong key, no access, or quota exceeded; try a different key/account
 
 ## Filename Generation
 
@@ -106,10 +132,10 @@ Preserve user's creative intent in both cases.
 Use templates when the user is vague or when edits must be precise.
 
 - Generation template:
-  - “Create an image of: <subject>. Style: <style>. Composition: <camera/shot>. Lighting: <lighting>. Background: <background>. Color palette: <palette>. Avoid: <list>.”
+  - "Create an image of: <subject>. Style: <style>. Composition: <camera/shot>. Lighting: <lighting>. Background: <background>. Color palette: <palette>. Avoid: <list>."
 
 - Editing template (preserve everything else):
-  - “Change ONLY: <single change>. Keep identical: subject, composition/crop, pose, lighting, color palette, background, text, and overall style. Do not add new objects. If text exists, keep it unchanged.”
+  - "Change ONLY: <single change>. Keep identical: subject, composition/crop, pose, lighting, color palette, background, text, and overall style. Do not add new objects. If text exists, keep it unchanged."
 
 ## Output
 
@@ -121,10 +147,10 @@ Use templates when the user is vague or when edits must be precise.
 
 **Generate new image:**
 ```bash
-uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "A serene Japanese garden with cherry blossoms" --filename "2025-11-23-14-23-05-japanese-garden.png" --resolution 4K
+uv run /Users/sc/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "A serene Japanese garden with cherry blossoms" --filename "2025-11-23-14-23-05-japanese-garden.png" --resolution 4K
 ```
 
 **Edit existing image:**
 ```bash
-uv run ~/.codex/skills/nano-banana-pro/scripts/generate_image.py --prompt "make the sky more dramatic with storm clouds" --filename "2025-11-23-14-25-30-dramatic-sky.png" --input-image "original-photo.jpg" --resolution 2K
+uv run /Users/sc/katana-agent/agent/skills/image-gen/nano-banana/scripts/generate_image.py --prompt "make the sky more dramatic with storm clouds" --filename "2025-11-23-14-25-30-dramatic-sky.png" --input-image "original-photo.jpg" --resolution 2K
 ```

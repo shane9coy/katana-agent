@@ -20,10 +20,25 @@ from pathlib import Path
 
 
 def get_api_key(provided_key: str | None) -> str | None:
-    """Get API key from argument first, then environment."""
+    """Get API key from argument first, then environment, then .env file."""
     if provided_key:
         return provided_key
-    return os.environ.get("GEMINI_API_KEY")
+    
+    # Check environment variable first
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        return api_key
+    
+    # Check .env file in project root
+    env_path = Path("/Users/sc/katana-agent/.env")
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("GEMINI_API_KEY="):
+                    return line.split("=", 1)[1].strip('"').strip("'")
+    
+    return None
 
 
 def main():
@@ -64,6 +79,7 @@ def main():
         print("Please either:", file=sys.stderr)
         print("  1. Provide --api-key argument", file=sys.stderr)
         print("  2. Set GEMINI_API_KEY environment variable", file=sys.stderr)
+        print("  3. Create a .env file in /Users/sc/katana-agent/ with: GEMINI_API_KEY=your-key", file=sys.stderr)
         sys.exit(1)
 
     # Import here after checking API key to avoid slow import on error

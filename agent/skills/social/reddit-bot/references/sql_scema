@@ -1,0 +1,95 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.daily_check_ins (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id text NOT NULL,
+  check_in_date date NOT NULL,
+  check_in_time timestamp with time zone DEFAULT now(),
+  interaction_mode USER-DEFINED,
+  duration_seconds integer,
+  email_summary jsonb,
+  email_count_today integer,
+  calendar_summary jsonb,
+  events_today_count integer,
+  next_event text,
+  next_event_in_minutes integer,
+  astrological_context jsonb,
+  moon_phase text,
+  mercury_retrograde boolean,
+  energy_level integer,
+  user_input_transcript text,
+  vibe_preferences jsonb,
+  success boolean DEFAULT true,
+  error_log text,
+  oracle_brief text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT daily_check_ins_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.news_feed (
+  url text NOT NULL,
+  title text NOT NULL,
+  summary text,
+  pubdate timestamp with time zone,
+  processed_at timestamp with time zone DEFAULT now(),
+  breaking boolean DEFAULT false,
+  worthy boolean DEFAULT false,
+  tweet_text text,
+  posted boolean DEFAULT false,
+  CONSTRAINT news_feed_pkey PRIMARY KEY (url)
+);
+CREATE TABLE public.reddit_coments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  submission_id text NOT NULL UNIQUE,
+  comment_id text,
+  subreddit text NOT NULL,
+  thread_title text,
+  thread_url text,
+  thread_sort USER-DEFINED,
+  thread_score_at_comment integer,
+  thread_num_comments_at_comment integer,
+  thread_upvote_ratio_at_comment real,
+  comment_text text,
+  strategy USER-DEFINED,
+  source_list USER-DEFINED,
+  keyword_matched text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT reddit_coments_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.reddit_comment_performance (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  comment_id text NOT NULL,
+  submission_id text NOT NULL,
+  checked_at timestamp with time zone DEFAULT now(),
+  comment_score integer,
+  comment_controversiality integer DEFAULT 0,
+  comment_is_visible boolean DEFAULT true,
+  comment_depth integer,
+  comment_awards integer DEFAULT 0,
+  thread_score integer,
+  thread_num_comments integer,
+  thread_upvote_ratio real,
+  thread_is_locked boolean DEFAULT false,
+  thread_is_removed boolean DEFAULT false,
+  comment_score_delta integer,
+  thread_score_delta integer,
+  thread_comments_delta integer,
+  hours_since_comment real,
+  engagement_ratio real,
+  controversy_engagement real,
+  CONSTRAINT reddit_comment_performance_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.reddit_targets (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  target_type USER-DEFINED NOT NULL,
+  source USER-DEFINED NOT NULL,
+  identifier text NOT NULL,
+  subreddit text,
+  subscriber_count integer,
+  discovery_reason text,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT reddit_targets_pkey PRIMARY KEY (id)
+);

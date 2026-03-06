@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quant Pulse Roadmap</title>
+<style>
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: #1a1a1a; /* Lighter than black */
+color: #ffffff;
+margin: 0;
+padding: 40px;
+line-height: 1.6;
+}
+.container {
+max-width: 1200px;
+margin: 0 auto;
+background: rgba(255, 255, 255, 0.1); /* Lighter subtle overlay */
+padding: 30px;
+border-radius: 12px;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+h1 {
+text-align: center;
+color: #008FFF; /* Main electric blue */
+font-size: 2.5em;
+margin-bottom: 20px;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+margin-bottom: 30px;
+}
+th {
+background-color: #008FFF; /* Main electric blue */
+color: #ffffff;
+padding: 12px;
+text-align: left;
+font-weight: bold;
+}
+td {
+padding: 12px;
+border-bottom: 1px solid #001f3f; /* Dark blue border */
+vertical-align: top;
+}
+tr:nth-child(even) {
+background-color: rgba(255, 255, 255, 0.1); /* Lighter subtle even rows */
+}
+ul {
+list-style-type: none;
+padding-left: 0;
+}
+li {
+margin-bottom: 8px;
+position: relative;
+padding-left: 20px;
+}
+li:before {
+content: "•";
+position: absolute;
+left: 0;
+color: #00008b; /* Dark blue */
+}
+.key-validation {
+font-style: italic;
+text-align: center;
+color: #f0f0f0; /* Off-white */
+margin-top: 20px;
+}
+.accent {
+color: #00008b; /* Dark blue for accents */
+font-weight: bold;
+}
+.note-toggle {
+cursor: pointer;
+color: #00008b; /* Dark blue */
+font-weight: bold;
+margin-top: 10px;
+}
+.note-content {
+display: none;
+background: rgba(255, 255, 255, 0.1);
+padding: 10px;
+border-radius: 8px;
+margin-top: 10px;
+}
+.growth-chart {
+text-align: center;
+margin-top: 40px;
+}
+.growth-chart img {
+max-width: 100%;
+border: 2px solid #001f3f; /* Dark blue border */
+border-radius: 8px;
+}
+</style>
+<script>
+function toggleNote() {
+var content = document.getElementById("ai-note-content");
+content.style.display = content.style.display === "block" ? "none" : "block";
+}
+</script>
+</head>
+<body>
+<div class="container">
+<h1>Quant Pulse 12-Month Roadmap</h1>
+<table>
+<thead>
+<tr>
+<th>Month</th>
+<th>Timeline/Date</th>
+<th>Milestone</th>
+<th>Success Metric</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Jan '26</td>
+<td>Launch Version 1.0 (Dashboard, basic tracking)</td>
+<td>Initial launch</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Feb '26</td>
+<td>Retention validation</td>
+<td><10% monthly churn</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Mar '26</td>
+<td>Version 1.2 (AI dashboard, live dilution/Congressional alerts)<br>
+<ul>
+<li>AI dashboard with Congressional and dilution alerts (Completed by End Feb 2026)</li>
+<li>Dedicated AI analysis tab</li>
+<li>Global market overview</li>
+<li>Stock-specific analysis</li>
+</ul>
+</td>
+<td>Price to $40/mo; 200 paying users, $8K MRR</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Apr '26</td>
+<td>Version 1.3 (Updates)<br>
+<ul>
+<li>Implement feedback by end of March '26</li>
+</ul>
+</td>
+<td><8% churn</td>
+</tr>
+<tr>
+<td>5-6</td>
+<td>May-Jun '26</td>
+<td>Version 1.4-1.5 (Scanners, enhanced AI scanning)<br>
+<ul>
+<li>Scanners and AI watchlist features (end of April-May '26)</li>
+<li>Custom filters for momentum criteria</li>
+<li>Real-time alerts and scanning</li>
+<li>AI analysis on watchlists and scanner results</li>
+<li>Prioritized stock picks</li>
+</ul>
+</td>
+<td>400 paying users, $20K MRR</td>
+</tr>
+<tr>
+<td>7-8</td>
+<td>Jul-Aug '26</td>
+<td>Affiliate program live (Version 1.5+)<br>
+<ul>
+<li>50% new users from referrals; social media growth via influencer partnerships (end of June '26)</li>
+<li>SUCCESS GOAL: 1,000 users, $40K MRR, <5% churn</li>
+</ul>
+</td>
+<td>50% referrals; 800 users, $30K MRR, <5% churn</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Sep '26</td>
+<td>Version 2.0 (Live AI trading voice interface)<br>
+<ul>
+<li>AI voice agent with live API integration (July 2026 rollout)</li>
+<li>Connected to Grok via XAPI</li>
+<li>Chained to stock database and live pricing (Alpaca or Polygon.io)</li>
+<li>Real-time info with zero hallucinations</li>
+</ul>
+</td>
+<td>1.2K users, $100K MRR</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Oct '26</td>
+<td>Product-market fit proven<br>
+<ul>
+<li>Custom Quant Indicators & Live Execution (Beginning of 2027)</li>
+<li>Integrate proprietary indicators</li>
+<li>AI reads indicators in real time</li>
+<li>Live trade signals: entries, targets, recommendations</li>
+</ul>
+</td>
+<td>1.5-2.5K users, $150-250K MRR; raise Series A</td>
+</tr>
+</tbody>
+</table>
+<p class="key-validation">Key validation: <5% monthly churn = ready to scale.</p>
+ 
+<!-- User Growth Timeline Chart -->
+<div class="growth-chart">
+<h2>User Growth Timeline</h2>
+<img src="user_growth.png" alt="User Growth Rate Chart">
+<p>Projected user growth over 10 months, highlighting milestones.</p>
+</div>
+</div>
+</body>
+</html>
