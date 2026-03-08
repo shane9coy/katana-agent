@@ -1,0 +1,21 @@
+═══ Oracle · {date} ═══
+
+☉ {sun_sign} · ☽ {moon_sign} · {moon_phase_glyph} {moon_phase_name} {illumination}%
+Day Ruler: {day_ruler_glyph} {day_ruler_name} — {day_ruler_meaning}
+{mercury_status}
+
+{natal_overlay}
+
+Active Aspects:
+{aspects}
+
+Moon Energy: {moon_energy}
+
+Timing Windows:
+  {morning_icon} Morning — {morning_energy}
+  ✦ Afternoon — {afternoon_energy}
+  🌙 Evening — {evening_energy}
+
+{calendar_overlay}
+
+{action_items}

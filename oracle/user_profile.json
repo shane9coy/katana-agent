@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "preferred_name": "",
+  "timezone": "America/New_York",
+  "locale": "en-US",
+  "house_system": "P",
+  "source_of_birth_data": "user_provided",
+  "coordinates_verified": false,
+  "birth_chart": {
+    "date": "",
+    "time": "",
+    "time_known": false,
+    "location": "",
+    "latitude": null,
+    "longitude": null,
+    "timezone": ""
+  },
+  "guidance_preferences": {
+    "tone": "warm, mystical, grounded",
+    "directness": "medium",
+    "ritual_language": true,
+    "default_view": "brief",
+    "include_reflective_questions": true
+  },
+  "life_domains": {
+    "communication": 0.9,
+    "relationships": 1.0,
+    "finance": 0.8,
+    "creativity": 0.7,
+    "rest": 0.6,
+    "decisive_action": 0.85,
+    "launches": 0.9,
+    "health": 0.8,
+    "spiritual": 0.6
+  },
+  "cached_chart": null,
+  "last_reading": null,
+  "streak": 0
+}

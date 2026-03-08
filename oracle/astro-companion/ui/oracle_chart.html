@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oracle Star Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --space: #0a0e1a;
+      --gold: #c9a84c;
+      --bone: #f0e6d3;
+      --sage: #7a9b8a;
+      --fire: #d35a4b;
+      --earth: #6b8f61;
+      --air: #8467d7;
+      --water: #4f7fd9;
+      --panel: rgba(10, 14, 26, 0.86);
+      --panel-border: rgba(201, 168, 76, 0.35);
+      --muted: rgba(240, 230, 211, 0.74);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: radial-gradient(circle at top, #16203a, var(--space) 58%); color: var(--bone); font-family: 'DM Sans', sans-serif; }
+    h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; letter-spacing: 0.03em; }
+    button, input { font: inherit; }
+
+    #app { position: relative; width: 100%; height: 100%; }
+    #scene { position: absolute; inset: 0; }
+
+    .panel {
+      position: absolute;
+      top: 20px;
+      bottom: 82px;
+      width: 320px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      padding: 18px;
+      overflow: auto;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.35);
+    }
+
+    #leftPanel { left: 20px; }
+    #rightPanel {
+      right: 20px;
+      transform: translateX(calc(100% - 56px));
+      transition: transform 220ms ease;
+      padding-right: 64px;
+    }
+    #rightPanel.open { transform: translateX(0); }
+
+    #drawerToggle {
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--bone);
+      cursor: pointer;
+    }
+
+    .title { margin: 0 0 4px; font-size: 2rem; }
+    .subtitle { color: var(--muted); margin: 0 0 16px; font-size: 0.92rem; line-height: 1.45; }
+    .section { margin: 18px 0 0; }
+    .section h3 { margin: 0 0 10px; font-size: 1.25rem; color: var(--gold); }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .stack { display: grid; gap: 10px; }
+    label { font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    input[type="datetime-local"] {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--bone);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    button.action {
+      background: linear-gradient(180deg, rgba(201,168,76,0.22), rgba(201,168,76,0.12));
+      color: var(--bone);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 120ms ease, background 160ms ease;
+    }
+    button.action:hover { transform: translateY(-1px); background: linear-gradient(180deg, rgba(201,168,76,0.32), rgba(201,168,76,0.16)); }
+
+    .pill {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+    }
+    .legend { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+    .legend .pill::before { content: ''; width: 10px; height: 10px; border-radius: 999px; margin-right: 8px; display: inline-block; }
+    .legend .fire::before { background: var(--fire); }
+    .legend .earth::before { background: var(--earth); }
+    .legend .air::before { background: var(--air); }
+    .legend .water::before { background: var(--water); }
+
+    .list { display: grid; gap: 8px; }
+    .card {
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .card strong { display: block; }
+    .card small { color: var(--muted); line-height: 1.4; }
+    .card.event { cursor: pointer; }
+    .card.event:hover { border-color: rgba(201,168,76,0.45); }
+
+    #bottomBar {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 18px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 16px;
+      border-radius: 16px;
+      background: rgba(10, 14, 26, 0.88);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      font-size: 0.95rem;
+    }
+
+    #tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(8, 10, 16, 0.95);
+      border: 1px solid rgba(201,168,76,0.5);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--bone);
+      font-size: 0.84rem;
+      display: none;
+      z-index: 4;
+      min-width: 160px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    }
+
+    .muted { color: var(--muted); }
+    .reading-body { display: grid; gap: 12px; line-height: 1.55; }
+    .tiny { font-size: 0.75rem; color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="scene"></div>
+
+    <div id="leftPanel" class="panel">
+      <h1 class="title">Oracle</h1>
+      <p class="subtitle">An interactive star map for timing, reflection, and pattern recognition. The browser view is illustrative; production readings should still prefer Astrovisor data when available.</p>
+
+      <div class="stack">
+        <label for="datetimeInput">Date & time</label>
+        <input id="datetimeInput" type="datetime-local" />
+        <div class="row">
+          <button id="nowButton" class="action">Now</button>
+          <button id="animateButton" class="action">Animate Day</button>
+          <button id="shareButton" class="action">Copy Link</button>
+        </div>
+        <button id="googleButton" class="action">Connect Google Calendar</button>
+      </div>
+
+      <div class="section">
+        <h3>Elements</h3>
+        <div class="legend">
+          <span class="pill fire">Fire</span>
+          <span class="pill earth">Earth</span>
+          <span class="pill air">Air</span>
+          <span class="pill water">Water</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Planetary Positions</h3>
+        <div id="positions" class="list"></div>
+      </div>
+
+      <div class="section">
+        <h3>Calendar Overlay</h3>
+        <div id="events" class="list"></div>
+      </div>
+    </div>
+
+    <div id="rightPanel" class="panel open">
+      <button id="drawerToggle">❮</button>
+      <h2 class="title">Reading</h2>
+      <div class="reading-body" id="readingBody"></div>
+      <div class="section">
+        <h3>Notes</h3>
+        <p class="tiny">The planetary motion in this file uses lightweight browser-side approximations so it can run as a standalone HTML file. Treat this as a visual companion. For authoritative guidance, Oracle should still use Astrovisor-backed calculations in Hermes.</p>
+      </div>
+    </div>
+
+    <div id="bottomBar">
+      <div id="statusLeft">Moon phase pending...</div>
+      <div id="statusCenter" class="muted">Click an event to snap the chart to that moment</div>
+      <div id="statusRight">Mercury status pending...</div>
+    </div>
+
+    <div id="tooltip"></div>
+  </div>
+
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    const zodiac = [
+      { name: 'Aries', glyph: '♈', element: 'fire' },
+      { name: 'Taurus', glyph: '♉', element: 'earth' },
+      { name: 'Gemini', glyph: '♊', element: 'air' },
+      { name: 'Cancer', glyph: '♋', element: 'water' },
+      { name: 'Leo', glyph: '♌', element: 'fire' },
+      { name: 'Virgo', glyph: '♍', element: 'earth' },
+      { name: 'Libra', glyph: '♎', element: 'air' },
+      { name: 'Scorpio', glyph: '♏', element: 'water' },
+      { name: 'Sagittarius', glyph: '♐', element: 'fire' },
+      { name: 'Capricorn', glyph: '♑', element: 'earth' },
+      { name: 'Aquarius', glyph: '♒', element: 'air' },
+      { name: 'Pisces', glyph: '♓', element: 'water' },
+    ];
+
+    const elementColors = {
+      fire: '#d35a4b',
+      earth: '#6b8f61',
+      air: '#8467d7',
+      water: '#4f7fd9',
+    };
+
+    const planets = [
+      { name: 'Sun', glyph: '☉', color: '#f3c14f', radius: 1.35, period: 365.256, lon0: 280.46, size: 0.18 },
+      { name: 'Moon', glyph: '☽', color: '#dbe4ff', radius: 0.9, period: 27.321, lon0: 218.32, size: 0.12 },
+      { name: 'Mercury', glyph: '☿', color: '#cbb28b', radius: 1.8, period: 87.969, lon0: 252.25, size: 0.08 },
+      { name: 'Venus', glyph: '♀', color: '#d8c0ff', radius: 2.2, period: 224.701, lon0: 181.98, size: 0.09 },
+      { name: 'Mars', glyph: '♂', color: '#d75b52', radius: 2.7, period: 686.98, lon0: 355.43, size: 0.1 },
+      { name: 'Jupiter', glyph: '♃', color: '#d9b28d', radius: 3.5, period: 4332.59, lon0: 34.35, size: 0.14 },
+      { name: 'Saturn', glyph: '♄', color: '#d9c58c', radius: 4.2, period: 10759.22, lon0: 50.08, size: 0.13 },
+      { name: 'Uranus', glyph: '♅', color: '#8ad1d3', radius: 4.9, period: 30688.5, lon0: 314.05, size: 0.12 },
+      { name: 'Neptune', glyph: '♆', color: '#7fa5ff', radius: 5.6, period: 60182, lon0: 304.35, size: 0.12 },
+      { name: 'Pluto', glyph: '♇', color: '#b58ad5', radius: 6.25, period: 90560, lon0: 238.93, size: 0.11 },
+    ];
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0e1a, 0.02);
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+    camera.position.set(0, 6.5, 10);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.getElementById('scene').appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.minDistance = 6;
+    controls.maxDistance = 18;
+    controls.target.set(0, 0, 0);
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.68);
+    scene.add(ambient);
+    const pointLight = new THREE.PointLight(0xf6d37d, 1.25, 40);
+    pointLight.position.set(0, 0, 0);
+    scene.add(pointLight);
+
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 1600;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 120;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+    }
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xf0e6d3, size: 0.08, transparent: true, opacity: 0.72 });
+    scene.add(new THREE.Points(starGeometry, starMaterial));
+
+    const zodiacGroup = new THREE.Group();
+    scene.add(zodiacGroup);
+
+    function makeArc(radius, startAngle, endAngle, color) {
+      const points = [];
+      for (let i = 0; i <= 48; i++) {
+        const t = startAngle + (endAngle - startAngle) * (i / 48);
+        points.push(new THREE.Vector3(Math.cos(t) * radius, 0, Math.sin(t) * radius));
+      }
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.95 });
+      return new THREE.Line(geometry, material);
+    }
+
+    function createTextSprite(message, color = '#f0e6d3') {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 256;
+      canvas.height = 128;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = color;
+      ctx.font = '44px DM Sans';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(material);
+      sprite.scale.set(1.2, 0.6, 1);
+      return sprite;
+    }
+
+    const zodiacRadius = 7.05;
+    zodiac.forEach((sign, index) => {
+      const start = (index / 12) * Math.PI * 2;
+      const end = ((index + 1) / 12) * Math.PI * 2;
+      const arc = makeArc(zodiacRadius, start, end, elementColors[sign.element]);
+      zodiacGroup.add(arc);
+
+      const innerArc = makeArc(6.55, start, end, elementColors[sign.element]);
+      zodiacGroup.add(innerArc);
+
+      const angle = start + (end - start) / 2;
+      const label = createTextSprite(`${sign.glyph} ${sign.name}`);
+      label.position.set(Math.cos(angle) * 7.75, 0, Math.sin(angle) * 7.75);
+      zodiacGroup.add(label);
+    });
+
+    planets.forEach((planet) => {
+      const ring = makeArc(planet.radius, 0, Math.PI * 2, 0x303d55);
+      ring.material.opacity = 0.45;
+      scene.add(ring);
+    });
+
+    const sunCore = new THREE.Mesh(
+      new THREE.SphereGeometry(0.28, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0xf6d37d })
+    );
+    scene.add(sunCore);
+
+    const planetGroup = new THREE.Group();
+    scene.add(planetGroup);
+    const planetMeshes = [];
+    planets.forEach((planet) => {
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(planet.size, 22, 22),
+        new THREE.MeshStandardMaterial({ color: planet.color, metalness: 0.18, roughness: 0.35, emissive: planet.color, emissiveIntensity: 0.18 })
+      );
+      mesh.userData.planet = planet;
+      planetGroup.add(mesh);
+      planetMeshes.push(mesh);
+    });
+
+    const tooltip = document.getElementById('tooltip');
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    const datetimeInput = document.getElementById('datetimeInput');
+    const positionsEl = document.getElementById('positions');
+    const eventsEl = document.getElementById('events');
+    const readingBody = document.getElementById('readingBody');
+    const statusLeft = document.getElementById('statusLeft');
+    const statusRight = document.getElementById('statusRight');
+    const rightPanel = document.getElementById('rightPanel');
+    const drawerToggle = document.getElementById('drawerToggle');
+
+    let animationHandle = null;
+    let currentEvents = [];
+
+    function julianDay(dateObj) {
+      return dateObj.getTime() / 86400000 + 2440587.5;
+    }
+
+    function daysSinceJ2000(dateObj) {
+      return julianDay(dateObj) - 2451545.0;
+    }
+
+    function normalizeAngle(deg) {
+      return ((deg % 360) + 360) % 360;
+    }
+
+    function zodiacInfo(longitude) {
+      const norm = normalizeAngle(longitude);
+      const signIndex = Math.floor(norm / 30);
+      const degree = norm % 30;
+      const sign = zodiac[signIndex];
+      return { ...sign, degree: degree.toFixed(1) };
+    }
+
+    function approximateLongitude(planet, dateObj) {
+      const d = daysSinceJ2000(dateObj);
+      if (planet.name === 'Sun') return normalizeAngle(280.46 + 0.9856474 * d);
+      if (planet.name === 'Moon') return normalizeAngle(218.32 + 13.176396 * d);
+      return normalizeAngle(planet.lon0 + (360 / planet.period) * d);
+    }
+
+    function mercuryRetrograde(dateObj) {
+      const jd = julianDay(dateObj);
+      const cycle = 115.88;
+      const retroDuration = 22.0;
+      const anchor = 2460668.5; // rough anchor point for the illustrative cycle
+      const phase = ((jd - anchor) % cycle + cycle) % cycle;
+      return phase < retroDuration;
+    }
+
+    function moonPhase(dateObj) {
+      const jd = julianDay(dateObj);
+      const synodic = 29.53058867;
+      const newMoonAnchor = 2451550.1;
+      const age = ((jd - newMoonAnchor) % synodic + synodic) % synodic;
+      const fraction = age / synodic;
+      const illumination = Math.round(((1 - Math.cos(fraction * Math.PI * 2)) / 2) * 100);
+      let name = 'Waxing Crescent';
+      if (age < 1.5) name = 'New Moon';
+      else if (age < 7.4) name = 'Waxing Crescent';
+      else if (age < 8.9) name = 'First Quarter';
+      else if (age < 14.2) name = 'Waxing Gibbous';
+      else if (age < 15.8) name = 'Full Moon';
+      else if (age < 22.1) name = 'Waning Gibbous';
+      else if (age < 23.6) name = 'Last Quarter';
+      else name = 'Waning Crescent';
+      return { name, illumination, glyph: name.includes('New') ? '🌑' : name.includes('First') ? '🌓' : name.includes('Full') ? '🌕' : name.includes('Last') ? '🌗' : name.includes('Waxing') ? '🌔' : '🌖' };
+    }
+
+    function sunSign(dateObj) {
+      return zodiacInfo(approximateLongitude(planets[0], dateObj)).name;
+    }
+
+    function buildSampleEvents(dateObj) {
+      const base = new Date(dateObj);
+      base.setMinutes(0, 0, 0);
+      const make = (hour, title, note) => {
+        const dt = new Date(base);
+        dt.setHours(hour, 0, 0, 0);
+        return { title, datetime: dt, note };
+      };
+      return [
+        make(9, 'Inbox triage + responses', 'Good for communication clean-up and clear replies.'),
+        make(14, 'Partnership call', 'Best for diplomacy, alignment, and future framing.'),
+        make(19, 'Evening reflection', 'Best for closure, journaling, and softer emotional processing.'),
+      ];
+    }
+
+    function readingForMoment(dateObj, positions) {
+      const moon = positions.find((item) => item.name === 'Moon');
+      const mercury = positions.find((item) => item.name === 'Mercury');
+      const phase = moonPhase(dateObj);
+      const mercuryRx = mercuryRetrograde(dateObj);
+      return {
+        headline: `☉ ${sunSign(dateObj)} · ☽ ${moon.sign} · ${phase.glyph} ${phase.name}`,
+        body: mercuryRx
+          ? 'Mercury is in an illustrative retrograde cycle here, so this window favors revision, editing, and thoughtful pacing over hard commitments.'
+          : 'Mercury reads as direct in this illustrative cycle, so messaging, planning, and clean articulation are favored.',
+        windows: [
+          'Morning — best for triage, messaging, and framing the day.',
+          'Afternoon — best for visible conversations, collaboration, and decision shaping.',
+          'Evening — best for reflection, repair, and spiritual integration.',
+        ],
+        mercuryRx,
+        phase,
+      };
+    }
+
+    function formatPositionCard(position) {
+      return `
+        <div class="card">
+          <strong>${position.glyph} ${position.name}</strong>
+          <small>${position.sign} ${position.degree}° · ${position.element}</small>
+        </div>
+      `;
+    }
+
+    function formatEventCard(event, annotation) {
+      return `
+        <div class="card event" data-iso="${event.datetime.toISOString()}">
+          <strong>${event.title}</strong>
+          <small>${event.datetime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} · ${annotation}</small>
+        </div>
+      `;
+    }
+
+    function updateFromDate(dateObj) {
+      const planetPositions = [];
+      planets.forEach((planet, index) => {
+        const longitude = approximateLongitude(planet, dateObj);
+        const angle = THREE.MathUtils.degToRad(longitude);
+        const mesh = planetMeshes[index];
+        mesh.position.set(Math.cos(angle) * planet.radius, 0.15 + Math.sin(angle * 3) * 0.08, Math.sin(angle) * planet.radius);
+        mesh.userData.longitude = longitude;
+        const signInfo = zodiacInfo(longitude);
+        mesh.userData.signInfo = signInfo;
+        planetPositions.push({
+          name: planet.name,
+          glyph: planet.glyph,
+          longitude,
+          sign: signInfo.name,
+          degree: signInfo.degree,
+          element: signInfo.element,
+          color: planet.color,
+        });
+      });
+
+      positionsEl.innerHTML = planetPositions.map(formatPositionCard).join('');
+
+      currentEvents = buildSampleEvents(dateObj);
+      const annotations = currentEvents.map((event) => {
+        const moonSign = zodiacInfo(approximateLongitude(planets[1], event.datetime)).name;
+        const mercuryRx = mercuryRetrograde(event.datetime);
+        return `${moonSign} Moon · ${mercuryRx ? 'Mercury retrograde' : 'Mercury direct'} · ${event.note}`;
+      });
+      eventsEl.innerHTML = currentEvents.map((event, index) => formatEventCard(event, annotations[index])).join('');
+      eventsEl.querySelectorAll('.event').forEach((card) => {
+        card.addEventListener('click', () => {
+          const dt = new Date(card.dataset.iso);
+          datetimeInput.value = toInputValue(dt);
+          updateFromDate(dt);
+        });
+      });
+
+      const reading = readingForMoment(dateObj, planetPositions);
+      readingBody.innerHTML = `
+        <div class="card">
+          <strong>${reading.headline}</strong>
+          <small>${reading.body}</small>
+        </div>
+        <div class="card">
+          <strong>Timing Windows</strong>
+          <small>${reading.windows.map(line => `• ${line}`).join('<br>')}</small>
+        </div>
+        <div class="card">
+          <strong>Oracle Note</strong>
+          <small>Use this star map to feel the geometry of the day. For final life guidance inside Hermes, let Oracle pull Astrovisor data, your calendar, and your consent-aware context together.</small>
+        </div>
+      `;
+
+      statusLeft.textContent = `${reading.phase.glyph} ${reading.phase.name} · ${reading.phase.illumination}% illumination · ☉ ${sunSign(dateObj)}`;
+      statusRight.textContent = mercuryRetrograde(dateObj) ? '☿ Mercury Retrograde (illustrative cycle)' : '☿ Mercury Direct (illustrative cycle)';
+      statusCenter.textContent = `${planetPositions[1].sign} Moon · click an event to pivot the wheel`;
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('dt', dateObj.toISOString());
+      history.replaceState({}, '', url.toString());
+    }
+
+    function toInputValue(dateObj) {
+      const local = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 16);
+    }
+
+    function fromInputValue(value) {
+      return value ? new Date(value) : new Date();
+    }
+
+    document.getElementById('nowButton').addEventListener('click', () => {
+      const now = new Date();
+      datetimeInput.value = toInputValue(now);
+      updateFromDate(now);
+    });
+
+    document.getElementById('animateButton').addEventListener('click', () => {
+      if (animationHandle) {
+        clearInterval(animationHandle);
+        animationHandle = null;
+        document.getElementById('animateButton').textContent = 'Animate Day';
+        return;
+      }
+      let dt = fromInputValue(datetimeInput.value);
+      const start = new Date(dt);
+      start.setHours(0, 0, 0, 0);
+      dt = start;
+      let steps = 0;
+      document.getElementById('animateButton').textContent = 'Stop';
+      animationHandle = setInterval(() => {
+        const next = new Date(start.getTime() + steps * 15 * 60000);
+        datetimeInput.value = toInputValue(next);
+        updateFromDate(next);
+        steps += 1;
+        if (steps > 96) {
+          clearInterval(animationHandle);
+          animationHandle = null;
+          document.getElementById('animateButton').textContent = 'Animate Day';
+        }
+      }, 120);
+    });
+
+    document.getElementById('shareButton').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        statusCenter.textContent = 'Share link copied. You can bookmark or serve this file locally.';
+      } catch (error) {
+        statusCenter.textContent = 'Unable to copy automatically. Use the current file URL in your browser.';
+      }
+    });
+
+    document.getElementById('googleButton').addEventListener('click', () => {
+      alert('Google Calendar lives in Hermes, not in this standalone file. In Oracle runtime, connect the existing google-workspace skill, then let Oracle overlay event data onto the reading.');
+    });
+
+    drawerToggle.addEventListener('click', () => {
+      rightPanel.classList.toggle('open');
+      drawerToggle.textContent = rightPanel.classList.contains('open') ? '❮' : '❯';
+    });
+
+    datetimeInput.addEventListener('change', () => updateFromDate(fromInputValue(datetimeInput.value)));
+
+    renderer.domElement.addEventListener('pointermove', (event) => {
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(planetMeshes);
+      if (!hits.length) {
+        tooltip.style.display = 'none';
+        return;
+      }
+      const hit = hits[0].object;
+      const info = hit.userData.signInfo;
+      tooltip.style.display = 'block';
+      tooltip.style.left = `${event.clientX + 14}px`;
+      tooltip.style.top = `${event.clientY + 14}px`;
+      tooltip.innerHTML = `<strong>${hit.userData.planet.glyph} ${hit.userData.planet.name}</strong><br><span class="muted">${info.name} ${info.degree}° · ${info.element}</span>`;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const initial = new URL(window.location.href).searchParams.get('dt');
+    const startDate = initial ? new Date(initial) : new Date();
+    datetimeInput.value = toInputValue(startDate);
+    updateFromDate(startDate);
+
+    function animate() {
+      requestAnimationFrame(animate);
+      zodiacGroup.rotation.y += 0.0008;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
