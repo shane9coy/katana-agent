@@ -1,0 +1,6 @@
+═══ Oracle Weekly Outlook · {start_date} → {end_date} ═══
+
+{highlights}
+
+Daily Flow:
+{daily_sections}
