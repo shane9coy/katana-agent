@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { MEMORY_DIR, AGENT_DIR, ensureDir } = require('./utils');
+const { MEMORY_DIR, ensureDir, ensureDefaultDataRoot, PATH_LABELS } = require('./utils');
 
 function status() {
+  ensureDefaultDataRoot();
+
   console.log('');
   console.log(chalk.bold('⚡ Katana Memory'));
-  console.log(chalk.dim(`  Vault: ~/katana-agent/agent/memory/`));
+  console.log(chalk.dim(`  Vault: ${PATH_LABELS.memory}`));
   console.log('');
 
   if (!fs.existsSync(MEMORY_DIR)) {
@@ -63,11 +65,13 @@ function status() {
   console.log(chalk.dim('  Projects:  ') + chalk.white(projectCount));
   console.log(chalk.dim('  Skills:    ') + chalk.white(skillCount));
   console.log('');
-  console.log(chalk.dim('  Open in Obsidian: ~/katana-agent/agent/memory/'));
+  console.log(chalk.dim(`  Open in Obsidian: ${PATH_LABELS.memory}`));
   console.log('');
 }
 
 function initVault() {
+  ensureDefaultDataRoot();
+
   console.log('');
   console.log(chalk.bold('⚡ Initializing Katana Memory Vault'));
   console.log('');
@@ -83,6 +87,8 @@ function initVault() {
   for (const dir of dirs) {
     ensureDir(path.join(MEMORY_DIR, dir));
   }
+
+  ensureDefaultDataRoot();
 
   // ─── soul.md ─────────────────────────────────────────────
   const soulPath = path.join(MEMORY_DIR, 'core', 'soul.md');
@@ -217,12 +223,14 @@ Auto-maintained by Katana Agent. Updated when skills are created or modified.
   }
 
   console.log('');
-  console.log(chalk.bold.green('  ✓ Memory vault ready at ~/katana-agent/agent/memory/'));
+  console.log(chalk.bold.green(`  ✓ Memory vault ready at ${PATH_LABELS.memory}`));
   console.log(chalk.dim('  Open this folder as an Obsidian vault to browse your agent\'s memory.'));
   console.log('');
 }
 
 function recall(query) {
+  ensureDefaultDataRoot();
+
   console.log('');
   console.log(chalk.bold(`⚡ Memory Recall: "${query}"`));
   console.log('');

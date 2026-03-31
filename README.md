@@ -25,8 +25,12 @@ katana memory init
 # 3. Drop your agent into any project
 katana init
 
-//or to set up for sepecific CLI agent
-katana [none, claude, gemini, codex, kilocode] init
+# Or initialize for a specific CLI agent
+katana claude init
+katana gemini init
+katana codex init
+katana kilocode init
+katana generic init
 
 (each buildout is tailored to the specific CLI's default .agent folder structure)
 
@@ -54,7 +58,8 @@ Katana manages your AI agent across every project from one place:
 │       ├── development/
 │       └── ...
 ├── commands/                        Agent personalities
-└── config.yaml                      Global config
+├── settings.json                    Shared default settings
+└── AGENT.md                         Shared root agent instructions
 ```
 
 When you run `katana claude init` in a project, it:
@@ -98,16 +103,17 @@ Choose what to install by category — no flooding your project with 30 skills y
 
   Skill Categories:
 
-    1. agents (2 skills) — oracle, sensei
-    2. business (1 skill) — rent
-    3. development (2 skills) — playwright, threejs
-    4. email (2 skills) — email-best-practices, himalaya
-    5. memory (3 skills) — obsidian, recall, remember
-    6. social (3 skills) — telegram, x-auto-dm, x-thread
+  Use ↑/↓ arrows to navigate
+  Press Space to toggle selections
+  Highlight Continue and press Enter to confirm
 
-    a = all, n = none, or enter numbers: 1,3,5
+  [x] Select All
+  [x] agents — 4 skills
+  [x] email — 2 skills
+  [ ] memory — 4 skills
+  → Continue
 
-  Install skill categories [a]: 4,6
+  Current selection: 2 selected
 
   ✓ Loaded 4 command(s) from ~/.katana/commands/
   ✓ Synced 5 skill(s) from Obsidian vault

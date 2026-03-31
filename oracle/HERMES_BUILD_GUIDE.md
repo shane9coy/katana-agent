@@ -4,7 +4,7 @@ This folder is the Oracle source pack.
 Treat it as the canonical build kit for a Hermes-native Oracle companion.
 
 Source pack location:
-- `/Users/sc/katana-agent/oracle`
+- `./oracle/` (repo-relative)
 
 Live runtime targets:
 - `project-root/SOUL.md`
@@ -94,7 +94,7 @@ Do not use ambiguous aliases like `action` when you mean `decisive_action`.
 
 ## Phase 1 — Patch the Seed Files
 
-These files are the source-of-truth pack and should exist in `/Users/sc/katana-agent/oracle/`:
+These files are the source-of-truth pack and should exist in `./oracle/`:
 
 - `SOUL.md`
 - `SKILL.md`
@@ -116,7 +116,7 @@ What changed from the earlier concept:
 
 ## Phase 2 — Build the Runtime Skill Pack
 
-Under `/Users/sc/katana-agent/oracle/astro-companion/` create:
+Under `./oracle/astro-companion/` create:
 
 - `scripts/oracle_utils.py`
 - `scripts/oracle_astrology.py`
@@ -284,12 +284,12 @@ The source pack should include lightweight tests for the deterministic core:
 - scoring penalties and boosts
 - astrology cache behavior
 
-These tests can live under `/Users/sc/katana-agent/oracle/tests/`.
+These tests can live under `./oracle/tests/`.
 
 Recommended command:
 
 ```bash
-python3 -m unittest discover /Users/sc/katana-agent/oracle/tests -v
+python3 -m unittest discover ./oracle/tests -v
 ```
 
 ---
@@ -299,12 +299,12 @@ python3 -m unittest discover /Users/sc/katana-agent/oracle/tests -v
 Recommended command:
 
 ```bash
-python3 /Users/sc/katana-agent/oracle/install_oracle.py \
-  --project-root /Users/sc/katana-agent
+python3 ./oracle/install_oracle.py \
+  --project-root .
 ```
 
 Expected results:
-- `/Users/sc/katana-agent/SOUL.md` exists
+- `./SOUL.md` exists
 - `~/.hermes/oracle/` contains state files and dirs
 - `~/.hermes/skills/oracle/astro-companion/` exists
 - `~/.hermes/config.yaml` contains a safe natal MCP snippet

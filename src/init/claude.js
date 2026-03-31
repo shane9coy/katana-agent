@@ -4,11 +4,26 @@ const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
 const { pickInstallItems } = require('../picker');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, AGENT_DIR, SETTINGS_FILE } = require('../utils');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, SETTINGS_FILE, PATH_LABELS, ensureDefaultDataRoot } = require('../utils');
+
+function getBundledCommands(templateDir) {
+  const commandsDir = path.join(templateDir, 'commands');
+  if (!fs.existsSync(commandsDir)) return [];
+
+  return fs.readdirSync(commandsDir)
+    .filter(file => file.endsWith('.md'))
+    .map(file => ({
+      name: file.replace('.md', ''),
+      path: path.join(commandsDir, file),
+    }));
+}
 
 async function init(opts) {
+  ensureDefaultDataRoot();
+
   const targetDir = path.join(process.cwd(), '.claude');
   const templateDir = path.join(__dirname, '../../templates/claude');
+  const bundledCommands = getBundledCommands(templateDir);
 
   console.log('');
   console.log(chalk.bold('⚡ Katana Agent → Claude Code'));
@@ -39,13 +54,13 @@ async function init(opts) {
 
   const overwrite = action !== 'merge';
 
-  // ─── Copy Template (base structure, WITHOUT settings.json) ──
-  copyDirRecursive(templateDir, targetDir, { overwrite, skip: ['settings.json'] });
+  // ─── Copy Template (base structure, WITHOUT settings.json or commands) ──
+  copyDirRecursive(templateDir, targetDir, { overwrite, skip: ['settings.json', 'commands'] });
 
   // ─── Settings.json Prompt ───────────────────────────────
   const settingsPath = path.join(targetDir, 'settings.json');
   const settingsSource = SETTINGS_FILE;
-  const sourceLabel = '~/katana-agent/agent/settings.json';
+  const sourceLabel = PATH_LABELS.settings;
 
   if (fs.existsSync(settingsPath) && action === 'merge') {
     // Existing settings — ask before overwriting
@@ -68,19 +83,30 @@ async function init(opts) {
 
   // ─── Interactive Picker (unless --all or --minimal) ─────
   const categories = getVaultCategories();
-  const userCommands = getVaultCommands();
+  const vaultCommands = getVaultCommands();
+  const availableCommandsMap = new Map();
+
+  for (const cmd of bundledCommands) {
+    availableCommandsMap.set(cmd.name, cmd);
+  }
+
+  for (const cmd of vaultCommands) {
+    availableCommandsMap.set(cmd.name, cmd);
+  }
+
+  const availableCommands = Array.from(availableCommandsMap.values());
 
   let selectedCategories = categories.map(c => c.name);
-  let selectedCommands = userCommands.map(c => c.name);
+  let selectedCommands = availableCommands.map(c => c.name);
 
   if (opts.minimal) {
     // --minimal: skip vault skills and commands, bundled only
     selectedCategories = [];
-    selectedCommands = [];
+    selectedCommands = bundledCommands.map(cmd => cmd.name);
     console.log(chalk.dim('  → Minimal mode: bundled skills only'));
-  } else if (!opts.all && (categories.length > 0 || userCommands.length > 0)) {
+  } else if (!opts.all && (categories.length > 0 || availableCommands.length > 0)) {
     // Interactive picker
-    const selections = await pickInstallItems(categories, userCommands);
+    const selections = await pickInstallItems(categories, availableCommands);
     selectedCategories = selections.categories;
     selectedCommands = selections.commands;
   } else if (opts.all) {
@@ -91,8 +117,12 @@ async function init(opts) {
   const commandsTarget = path.join(targetDir, 'commands');
   ensureDir(commandsTarget);
 
+  if (selectedCommands.length > 0) {
+    console.log(chalk.dim(`  → Installing ${selectedCommands.length} selected command(s)...`));
+  }
+
   let commandCount = 0;
-  for (const cmd of userCommands) {
+  for (const cmd of availableCommands) {
     if (!selectedCommands.includes(cmd.name)) continue;
     const dest = path.join(commandsTarget, cmd.name + '.md');
     if (!overwrite && fs.existsSync(dest)) continue;
@@ -101,12 +131,17 @@ async function init(opts) {
   }
 
   if (commandCount > 0) {
-    console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/katana-agent/agent/commands/`));
+    console.log(chalk.green(`  ✓ Loaded ${commandCount} selected command(s)`));
   }
 
   // ─── Install Selected Skill Categories ──────────────────
   const skillsTarget = path.join(targetDir, 'skills');
   ensureDir(skillsTarget);
+
+  if (selectedCategories.length > 0) {
+    const categoryLabel = selectedCategories.length === 1 ? 'category' : 'categories';
+    console.log(chalk.dim(`  → Syncing ${selectedCategories.length} selected skill ${categoryLabel}...`));
+  }
 
   let skillCount = 0;
   const allSkills = getVaultSkills();
@@ -155,7 +190,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Commands: ') + chalk.white(`${totalCommands} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${totalSkills} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white(`${PATH_LABELS.memory} (Obsidian vault)`));
   console.log('');
   console.log(chalk.dim('  Usage: Open this project in Claude Code — your agent is ready.'));
   if (installedAgents.length > 0) {
@@ -173,12 +208,12 @@ ${project.stack}
 ${project.commands ? `\n## Available Commands\n${project.commands.split(', ').map(c => '- \`' + c + '\`').join('\n')}` : ''}
 
 ## Agent
-This project uses **Katana Agent**. Memory is stored in \`~/katana-agent/agent/memory/\` (Obsidian vault).
+This project uses **Katana Agent**. Memory is stored in \`${PATH_LABELS.memory}\` (Obsidian vault).
 
 On session start, read:
-- \`~/katana-agent/agent/memory/core/soul.md\` — your identity and behavior
-- \`~/katana-agent/agent/memory/core/user.md\` — facts about the user
-- Check \`~/katana-agent/agent/memory/projects/${project.name}/\` for project history (if it exists)
+- \`${PATH_LABELS.memory}core/soul.md\` — your identity and behavior
+- \`${PATH_LABELS.memory}core/user.md\` — facts about the user
+- Check \`${PATH_LABELS.memory}projects/${project.name}/\` for project history (if it exists)
 
 ## Code Conventions
 - (add your project conventions here)

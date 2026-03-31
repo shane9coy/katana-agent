@@ -4,9 +4,11 @@ const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
 const { pickInstallItems } = require('../picker');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, SETTINGS_FILE } = require('../utils');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, SETTINGS_FILE, PATH_LABELS, ensureDefaultDataRoot } = require('../utils');
 
 async function init(opts) {
+  ensureDefaultDataRoot();
+
   const folderName = opts.dir || '.agent';
   const targetDir = path.join(process.cwd(), folderName);
   const templateDir = path.join(__dirname, '../../templates/generic');
@@ -41,7 +43,7 @@ async function init(opts) {
   // ─── Settings.json Prompt ───────────────────────────────
   const settingsPath = path.join(targetDir, 'settings.json');
   const settingsSource = SETTINGS_FILE;
-  const sourceLabel = '~/katana-agent/agent/settings.json';
+  const sourceLabel = PATH_LABELS.settings;
 
   if (fs.existsSync(settingsPath) && action === 'merge') {
     // Existing settings — ask before overwriting
@@ -84,7 +86,7 @@ async function init(opts) {
     console.log(chalk.dim('  → All mode: installing everything'));
   }
 
-  // Copy commands from ~/katana-agent/agent/commands/ (overrides bundled templates)
+  // Copy commands from ~/.katana/commands/ (overrides bundled templates)
   if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const commandsTarget = path.join(targetDir, 'commands');
     ensureDir(commandsTarget);
@@ -99,7 +101,7 @@ async function init(opts) {
       commandCount++;
     }
     if (commandCount > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ~/katana-agent/agent/commands/`));
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} command(s) from ${PATH_LABELS.commands}`));
     }
   }
 
@@ -145,7 +147,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Commands: ') + chalk.white(`${commandCount} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${skillCount} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white(`${PATH_LABELS.memory} (Obsidian vault)`));
   console.log('');
   console.log(chalk.dim('  Point your agent to read AGENT.md on session start.'));
   console.log(chalk.dim('  All skills are standard SKILL.md format (AgentSkills spec).'));
@@ -163,21 +165,21 @@ ${project.commands ? `\n## Available Commands\n${project.commands.split(', ').ma
 This project uses **Katana Agent** with centralized Obsidian memory.
 
 ### Memory Vault Location
-All persistent memory lives at \`~/katana-agent/agent/memory/\`. This is an Obsidian-compatible vault.
+All persistent memory lives at \`${PATH_LABELS.memory}\`. This is an Obsidian-compatible vault.
 
 ### On Session Start
-1. Read \`~/katana-agent/agent/memory/core/soul.md\` — your identity and behavior guidelines
-2. Read \`~/katana-agent/agent/memory/core/user.md\` — facts about the user
-3. Read \`~/katana-agent/agent/memory/core/routines.md\` — learned patterns and workflows
-4. Check \`~/katana-agent/agent/memory/projects/${project.name}/\` for project-specific history
+1. Read \`${PATH_LABELS.memory}core/soul.md\` — your identity and behavior guidelines
+2. Read \`${PATH_LABELS.memory}core/user.md\` — facts about the user
+3. Read \`${PATH_LABELS.memory}core/routines.md\` — learned patterns and workflows
+4. Check \`${PATH_LABELS.memory}projects/${project.name}/\` for project-specific history
 
 ### Memory Commands
-- **Remember:** When user says "remember this" or session ends, summarize key decisions and append to \`~/katana-agent/agent/memory/work.md\` (newest at top). Format: \`## YYYY-MM-DD — ${project.name}\`
-- **Recall:** When user asks about past work, search \`~/katana-agent/agent/memory/work.md\` and \`~/katana-agent/agent/memory/projects/\`
+- **Remember:** When user says "remember this" or session ends, summarize key decisions and append to \`${PATH_LABELS.memory}work.md\` (newest at top). Format: \`## YYYY-MM-DD — ${project.name}\`
+- **Recall:** When user asks about past work, search \`${PATH_LABELS.memory}work.md\` and \`${PATH_LABELS.memory}projects/\`
 
 ### Skills
 Check \`./skills/\` directory for available skills. Each skill has a \`SKILL.md\` with instructions.
-Check \`~/katana-agent/agent/memory/skills/_index.md\` for skills in the central vault.
+Check \`${PATH_LABELS.skillIndex}\` for skills in the central vault.
 
 ## Code Conventions
 - (add your project conventions here)
@@ -185,7 +187,7 @@ Check \`~/katana-agent/agent/memory/skills/_index.md\` for skills in the central
 ## Notes
 - Skills use the AgentSkills spec (SKILL.md with YAML frontmatter)
 - Memory files use Obsidian-compatible markdown with [[wikilinks]] and #tags
-- Open \`~/katana-agent/agent/memory/\` in Obsidian to browse your agent's brain
+- Open \`${PATH_LABELS.memory}\` in Obsidian to browse your agent's brain
 `;
 }
 
