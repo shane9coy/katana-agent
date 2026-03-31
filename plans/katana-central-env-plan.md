@@ -11,13 +11,13 @@ Implement a central `.env` file for Katana (like Hermes `~/.hermes/.env`) to sto
 ## Proposed Structure
 
 ```
-~/katana-agent/
-├── agent/
-│   ├── .env              # NEW: Central API keys (source of truth)
-│   ├── settings.json     # Agent permissions & MCP config
-│   ├── commands/         # Agent commands
-│   ├── skills/           # Skills (read .env from parent)
-│   └── memory/           # Obsidian vault
+~/.katana/
+├── .env                  # NEW: Central API keys (source of truth)
+├── settings.json         # Agent permissions & MCP config
+├── commands/             # Agent commands
+├── AGENT.md              # Shared root agent instructions
+└── memory/               # Obsidian vault
+    └── skills/           # Skills (read .env from parent)
 ```
 
 ## Implementation Steps
@@ -53,7 +53,7 @@ Add a section in Workflow 1 for skills that need API keys:
 If your skill requires API keys, use the central .env file instead of creating
 a separate .env in the skill folder.
 
-**Central location:** `~/katana-agent/agent/.env`
+**Central location:** `~/.katana/.env`
 
 Example - instead of creating `skill-folder/.env`:
 ```bash
@@ -64,7 +64,7 @@ echo "API_KEY=xxx" > .claude/skills/my-skill/.env
 Do this instead:
 ```bash
 # CORRECT - add to central .env
-echo "MY_SKILL_API_KEY=xxx" >> ~/katana-agent/agent/.env
+echo "MY_SKILL_API_KEY=xxx" >> ~/.katana/.env
 ```
 
 Then in your skill code, read from the central location:
@@ -86,13 +86,13 @@ File: `agent/skills/agents/installer/SKILL.md`
 Change from:
 ```bash
 # Write to skill folder
-echo "X_BEARER_TOKEN=..." > ~/katana-agent/agent/skills/social/x-auto-dm/.env
+echo "X_BEARER_TOKEN=..." > ~/.katana/memory/skills/social/x-auto-dm/.env
 ```
 
 To:
 ```bash
 # Write to central .env
-echo "X_BEARER_TOKEN=..." >> ~/katana-agent/agent/.env
+echo "X_BEARER_TOKEN=..." >> ~/.katana/.env
 ```
 
 ### 3. Add .env Loading Logic
@@ -117,7 +117,7 @@ load_dotenv('./.env')
 Updated:
 ```python
 # Check skill folder first, then central location
-load_dotenv(os.path.expanduser('~/katana-agent/agent/.env'))
+load_dotenv(os.path.expanduser('~/.katana/.env'))
 ```
 
 ### 5. Setup Wizard Enhancement

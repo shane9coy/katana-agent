@@ -25,7 +25,7 @@ Fetches and summarizes news from configured RSS feeds, financial sources, X/Twit
 
 ## Feed Configuration
 
-Feeds are stored in `~/katana-agent/agent/skills/stream/feeds.json`. This file contains all RSS/JSON feed URLs organized by category. The agent reads this file, curls each URL, parses the response, and summarizes.
+Feeds are stored in `~/.katana/memory/skills/productivity/news-stream/feeds.json`. This file contains all RSS/JSON feed URLs organized by category. The agent reads this file, curls each URL, parses the response, and summarizes.
 
 ## How to Fetch Feeds
 
@@ -99,10 +99,10 @@ This is actually XML/Atom. Parse `<entry>` elements for `<title>`, `<link>`, `<u
 ## Integration
 
 ### Morning Routine (Sensei)
-When Sensei runs the morning check-in, it should call `/stream` and include the top 3-5 headlines in the briefing. Check `~/katana-agent/agent/memory/core/user.md` for the user's interests, active investments, or tracked topics — prioritize news that matches.
+When Sensei runs the morning check-in, it should call `/stream` and include the top 3-5 headlines in the briefing. Check `~/.katana/memory/core/user.md` for the user's interests, active investments, or tracked topics — prioritize news that matches.
 
 ### Memory
-After each stream pull, optionally log a one-line summary to `~/katana-agent/agent/memory/work.md`:
+After each stream pull, optionally log a one-line summary to `~/.katana/memory/work.md`:
 ```
 ## 2026-03-04 — Stream
 Checked 15 feeds, 23 new items. Key: Fed held rates, NVDA earnings beat, new AI regulation proposed in EU.

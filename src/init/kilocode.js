@@ -4,9 +4,11 @@ const readline = require('readline');
 const chalk = require('chalk');
 const { checkConflict } = require('../conflict');
 const { pickInstallItems } = require('../picker');
-const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, SETTINGS_FILE } = require('../utils');
+const { copyDirRecursive, ensureDir, detectProjectStack, getVaultSkills, getVaultCategories, getVaultCommands, MEMORY_DIR, COMMANDS_DIR, SETTINGS_FILE, PATH_LABELS, ensureDefaultDataRoot } = require('../utils');
 
 async function init(opts) {
+  ensureDefaultDataRoot();
+
   const targetDir = path.join(process.cwd(), '.kilocode');
   const templateDir = path.join(__dirname, '../../templates/kilocode');
 
@@ -37,7 +39,7 @@ async function init(opts) {
   // ─── Settings.json Prompt ───────────────────────────────
   const settingsPath = path.join(targetDir, 'settings.json');
   const settingsSource = SETTINGS_FILE;
-  const sourceLabel = '~/katana-agent/agent/settings.json';
+  const sourceLabel = PATH_LABELS.settings;
 
   if (fs.existsSync(settingsPath) && action === 'merge') {
     // Existing settings — ask before overwriting
@@ -80,7 +82,7 @@ async function init(opts) {
     console.log(chalk.dim('  → All mode: installing everything'));
   }
 
-  // Copy commands from ~/katana-agent/agent/commands/
+  // Copy commands from ~/.katana/commands/
   if (fs.existsSync(COMMANDS_DIR) && selectedCommands.length > 0) {
     const agentsDir = path.join(targetDir, 'agents');
     ensureDir(agentsDir);
@@ -95,7 +97,7 @@ async function init(opts) {
       commandCount++;
     }
     if (commandCount > 0) {
-      console.log(chalk.green(`  ✓ Loaded ${commandCount} agent(s) from ~/katana-agent/agent/commands/`));
+      console.log(chalk.green(`  ✓ Loaded ${commandCount} agent(s) from ${PATH_LABELS.commands}`));
     }
   }
 
@@ -142,7 +144,7 @@ async function init(opts) {
   console.log('');
   console.log(chalk.dim('  Agents:   ') + chalk.white(`${agentCount} installed`));
   console.log(chalk.dim('  Skills:   ') + chalk.white(`${skillCount} installed`));
-  console.log(chalk.dim('  Memory:   ') + chalk.white('~/katana-agent/agent/memory/ (Obsidian vault)'));
+  console.log(chalk.dim('  Memory:   ') + chalk.white(`${PATH_LABELS.memory} (Obsidian vault)`));
   console.log('');
 }
 
@@ -173,11 +175,11 @@ function generateAgentsMd(project) {
 ${project.stack}
 
 ## Agent
-This project uses **Katana Agent**. Memory: \`~/katana-agent/agent/memory/\` (Obsidian vault).
+This project uses **Katana Agent**. Memory: \`${PATH_LABELS.memory}\` (Obsidian vault).
 
 On session start, read:
-- \`~/katana-agent/agent/memory/core/soul.md\` — agent identity
-- \`~/katana-agent/agent/memory/core/user.md\` — user context
+- \`${PATH_LABELS.memory}core/soul.md\` — agent identity
+- \`${PATH_LABELS.memory}core/user.md\` — user context
 
 ## Conventions
 - (add your conventions here)

@@ -12,7 +12,7 @@ description: "Create a new skill from scratch. Use when user asks to create, bui
 ## Steps
 
 ### 1. Check existing skills first
-Read `~/katana-agent/agent/memory/skills/_index.md` to see if a similar skill already exists.
+Read `~/.katana/memory/skills/_index.md` to see if a similar skill already exists.
 If yes → update the existing skill instead of creating a duplicate.
 
 ### 2. Gather info
@@ -23,7 +23,7 @@ If yes → update the existing skill instead of creating a duplicate.
 ### 3. Create the skill folder
 
 ```
-~/katana-agent/agent/memory/skills/{category}/{skill-name}/
+~/.katana/memory/skills/{category}/{skill-name}/
 ├── SKILL.md              # Main skill file
 ├── references/           # (optional) supporting docs
 └── scripts/              # (optional) executable helpers
@@ -59,7 +59,7 @@ last_used: null
 ```
 
 ### 5. Update the index
-Append to `~/katana-agent/agent/memory/skills/_index.md`:
+Append to `~/.katana/memory/skills/_index.md`:
 ```markdown
 ## {Category}
 - [[{skill-name}]] — {brief description}
@@ -68,8 +68,8 @@ Append to `~/katana-agent/agent/memory/skills/_index.md`:
 ### 6. Confirm
 ```
 ✓ Created skill: {skill-name}
-  Location: ~/katana-agent/agent/memory/skills/{category}/{skill-name}/
-  Indexed in: ~/katana-agent/agent/memory/skills/_index.md
+  Location: ~/.katana/memory/skills/{category}/{skill-name}/
+  Indexed in: ~/.katana/memory/skills/_index.md
 ```
 
 ## Rules

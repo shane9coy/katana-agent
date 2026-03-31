@@ -44,13 +44,13 @@ After install, the `katana` command is available globally.
 
 Katana V1 has two layers:
 
-### 1. The Tool (~/katana-agent/)
+### 1. The Package (npm install or repo checkout)
 
-The npm package. Contains the CLI, generators, templates, and logic. This is the code you install and publish. It reads from your personal data and writes into projects.
+The CLI package itself. It can be installed globally via npm or run from a local repository checkout. It reads from your personal `~/.katana/` data folder and writes into projects.
 
 ### 2. Your Data (~/.katana/)
 
-Your agent brain. Contains your memory vault, agent personalities, and global config. This is personal and persistent — it survives across projects, reinstalls, and updates.
+Your agent brain. Contains your memory vault, agent personalities, shared settings, and root instructions. This is personal and persistent — it survives across projects, reinstalls, and updates.
 
 ```
 ~/.katana/                           ← YOUR DATA (persistent, personal)
@@ -99,7 +99,8 @@ Your agent brain. Contains your memory vault, agent personalities, and global co
 │   ├── stream.md                    ← Content & streaming
 │   └── vibe-curator.md              ← Taste & lifestyle
 │
-└── config.yaml                      ← Global config (V2 uses this)
+├── settings.json                    ← Shared default settings
+└── AGENT.md                         ← Shared root agent instructions
 ```
 
 ### How They Connect

@@ -16,7 +16,7 @@ This skill turns any CLI agent into a Katana setup wizard. When triggered, walk 
 
 Two entry points:
 
-1. **Shell script first:** `bash ~/katana-agent/setup.sh` — verifies system install, then tells user to come to you for skill config
+1. **CLI bootstrap first:** `katana memory init` — ensures the `~/.katana/` data folder exists before continuing with setup
 2. **Direct:** User says `/setup` or "set up my katana" — you handle everything
 
 ## Step 1: Audit Current State
@@ -24,17 +24,17 @@ Two entry points:
 Read these files before doing anything:
 
 ```bash
-ls ~/katana-agent/agent/commands/
-ls ~/katana-agent/agent/skills/
-cat ~/katana-agent/agent/memory/core/user.md
-cat ~/katana-agent/agent/settings.json
+ls ~/.katana/commands/
+ls ~/.katana/memory/skills/
+cat ~/.katana/memory/core/user.md
+cat ~/.katana/settings.json
 ```
 
 Report what you find: how many commands, how many skills, whether user.md is filled in, what's configured vs needs setup.
 
 ## Step 2: User Profile
 
-If `~/katana-agent/agent/memory/core/user.md` is empty or minimal, ask conversationally:
+If `~/.katana/memory/core/user.md` is empty or minimal, ask conversationally:
 
 - What's your name?
 - Where are you located? (timezone)
@@ -80,20 +80,20 @@ obsidian, obsidian-memory, remember, recall, email-best-practices, weather, trel
 
 ```bash
 # X API keys → x-auto-dm skill folder
-echo "X_BEARER_TOKEN=your_token" > ~/katana-agent/agent/skills/social/x-auto-dm/.env
+echo "X_BEARER_TOKEN=your_token" > ~/.katana/memory/skills/social/x-auto-dm/.env
 
 # Telegram bot token
-echo "TELEGRAM_BOT_TOKEN=your_token" > ~/katana-agent/agent/skills/social/telegram/.env
+echo "TELEGRAM_BOT_TOKEN=your_token" > ~/.katana/memory/skills/social/telegram/.env
 
 # Google Places
-echo "GOOGLE_PLACES_API_KEY=your_key" > ~/katana-agent/agent/skills/productivity/go-places/.env
+echo "GOOGLE_PLACES_API_KEY=your_key" > ~/.katana/memory/skills/productivity/go-places/.env
 ```
 
 **NEVER ask the user to manually edit files.** Offer to write values for them.
 
 ## Step 4: Settings.json
 
-Show current permissions from `~/katana-agent/agent/settings.json`. Explain what each does. Ask if they want to add MCP servers or permissions.
+Show current permissions from `~/.katana/settings.json`. Explain what each does. Ask if they want to add MCP servers or permissions.
 
 ## Step 5: Summary
 

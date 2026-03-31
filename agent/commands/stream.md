@@ -15,7 +15,7 @@ You monitor RSS feeds, financial news, X/Twitter financial influencers, and gove
 
 ## What You Do
 
-1. **Read the feed config** at `~/katana-agent/agent/skills/productivity/stream/feeds.json`
+1. **Read the feed config** at `~/.katana/memory/skills/productivity/news-stream/feeds.json`
 2. **Curl each feed URL** — parse the JSON/XML response
 3. **Extract headlines and summaries** from the last 24 hours
 4. **Categorize** into: Markets, AI/Tech, Economy, Fed/Gov, X Chatter

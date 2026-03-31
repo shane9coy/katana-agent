@@ -3,13 +3,155 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // ─── Paths ───────────────────────────────────────────────────
-// Resolve katana-agent repo root (works for npm link, global install, or local)
-const KATANA_ROOT = path.resolve(__dirname, '..');
-const AGENT_DIR = path.join(KATANA_ROOT, 'agent');
-const MEMORY_DIR = path.join(AGENT_DIR, 'memory');
-const VAULT_SKILLS_DIR = path.join(AGENT_DIR, 'skills');
-const COMMANDS_DIR = path.join(AGENT_DIR, 'commands');
-const SETTINGS_FILE = path.join(AGENT_DIR, 'settings.json');
+// Prefer user-writable ~/.katana data, support legacy ~/katana-agent installs,
+// and fall back to bundled package assets when running via npm link or npm install.
+const PACKAGE_ROOT = path.resolve(__dirname, '..');
+const USER_HOME = process.env.HOME || process.cwd();
+const currentFolder = path.basename(PACKAGE_ROOT);
+const isLocal = currentFolder.includes('local');
+
+const DATA_ROOT = path.join(USER_HOME, '.katana');
+const LEGACY_ROOT = isLocal
+  ? path.join(USER_HOME, 'katana-agent-local')
+  : path.join(USER_HOME, 'katana-agent');
+const LEGACY_AGENT_DIR = path.join(LEGACY_ROOT, 'agent');
+const PACKAGE_AGENT_DIR = path.join(PACKAGE_ROOT, 'agent');
+
+const CUSTOM_MEMORY_DIR = path.join(DATA_ROOT, 'memory');
+const CUSTOM_MEMORY_SETTINGS_FILE = path.join(CUSTOM_MEMORY_DIR, 'settings.json');
+const CUSTOM_COMMANDS_DIR = path.join(DATA_ROOT, 'commands');
+const CUSTOM_SETTINGS_FILE = path.join(DATA_ROOT, 'settings.json');
+const CUSTOM_SKILLS_DIR = path.join(CUSTOM_MEMORY_DIR, 'skills');
+const CUSTOM_AGENT_MD = path.join(DATA_ROOT, 'AGENT.md');
+
+const LEGACY_MEMORY_DIR = path.join(LEGACY_AGENT_DIR, 'memory');
+const LEGACY_MEMORY_SETTINGS_FILE = path.join(LEGACY_MEMORY_DIR, 'settings.json');
+const LEGACY_COMMANDS_DIR = path.join(LEGACY_AGENT_DIR, 'commands');
+const LEGACY_SETTINGS_FILE = path.join(LEGACY_AGENT_DIR, 'settings.json');
+const LEGACY_SKILLS_DIR = path.join(LEGACY_AGENT_DIR, 'skills');
+const LEGACY_AGENT_MD = path.join(LEGACY_ROOT, 'AGENT.md');
+
+const PACKAGE_MEMORY_SETTINGS_FILE = path.join(PACKAGE_AGENT_DIR, 'memory', 'settings.json');
+const PACKAGE_COMMANDS_DIR = path.join(PACKAGE_AGENT_DIR, 'commands');
+const PACKAGE_SETTINGS_FILE = path.join(PACKAGE_AGENT_DIR, 'settings.json');
+const PACKAGE_SKILLS_DIR = path.join(PACKAGE_AGENT_DIR, 'skills');
+const PACKAGE_AGENT_MD = path.join(PACKAGE_ROOT, 'AGENT.md');
+
+const PATH_LABELS = {
+  root: '~/.katana',
+  memory: '~/.katana/memory/',
+  memorySettings: '~/.katana/memory/settings.json',
+  commands: '~/.katana/commands/',
+  settings: '~/.katana/settings.json',
+  skills: '~/.katana/memory/skills/',
+  skillIndex: '~/.katana/memory/skills/_index.md',
+  agentMd: '~/.katana/AGENT.md',
+  legacyRoot: isLocal ? '~/katana-agent-local' : '~/katana-agent',
+  legacyMemory: isLocal ? '~/katana-agent-local/agent/memory/' : '~/katana-agent/agent/memory/',
+  legacyCommands: isLocal ? '~/katana-agent-local/agent/commands/' : '~/katana-agent/agent/commands/',
+  legacySettings: isLocal ? '~/katana-agent-local/agent/settings.json' : '~/katana-agent/agent/settings.json',
+};
+
+function firstMatch(candidates, predicate) {
+  return candidates.find(candidate => {
+    try {
+      return predicate(candidate);
+    } catch (error) {
+      return false;
+    }
+  }) || candidates[candidates.length - 1];
+}
+
+function fileExists(filePath) {
+  return fs.existsSync(filePath);
+}
+
+function copyFileIfMissing(sourcePath, destinationPath) {
+  if (!fs.existsSync(sourcePath) || fs.existsSync(destinationPath)) return false;
+  ensureDir(path.dirname(destinationPath));
+  fs.copyFileSync(sourcePath, destinationPath);
+  return true;
+}
+
+function dirHasCommands(dirPath) {
+  if (!fs.existsSync(dirPath)) return false;
+
+  return fs.readdirSync(dirPath, { withFileTypes: true })
+    .some(entry => entry.isFile() && entry.name.endsWith('.md'));
+}
+
+function dirHasSkills(dirPath) {
+  if (!fs.existsSync(dirPath)) return false;
+
+  for (const category of fs.readdirSync(dirPath, { withFileTypes: true })) {
+    if (!category.isDirectory() || category.name.startsWith('.')) continue;
+
+    const categoryPath = path.join(dirPath, category.name);
+    for (const skill of fs.readdirSync(categoryPath, { withFileTypes: true })) {
+      if (!skill.isDirectory()) continue;
+      if (fs.existsSync(path.join(categoryPath, skill.name, 'SKILL.md'))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function ensureDefaultDataRoot() {
+  const hadCustomMemoryContent = fs.existsSync(CUSTOM_MEMORY_DIR)
+    && fs.readdirSync(CUSTOM_MEMORY_DIR).length > 0;
+
+  ensureDir(DATA_ROOT);
+  ensureDir(CUSTOM_MEMORY_DIR);
+
+  if (!hadCustomMemoryContent && fs.existsSync(LEGACY_MEMORY_DIR)) {
+    copyDirRecursive(LEGACY_MEMORY_DIR, CUSTOM_MEMORY_DIR, { overwrite: false });
+  }
+
+  if (!dirHasSkills(CUSTOM_SKILLS_DIR)) {
+    if (dirHasSkills(LEGACY_SKILLS_DIR)) {
+      copyDirRecursive(LEGACY_SKILLS_DIR, CUSTOM_SKILLS_DIR, { overwrite: false });
+    } else if (dirHasSkills(PACKAGE_SKILLS_DIR)) {
+      copyDirRecursive(PACKAGE_SKILLS_DIR, CUSTOM_SKILLS_DIR, { overwrite: false });
+    }
+  }
+
+  if (!dirHasCommands(CUSTOM_COMMANDS_DIR)) {
+    if (dirHasCommands(LEGACY_COMMANDS_DIR)) {
+      copyDirRecursive(LEGACY_COMMANDS_DIR, CUSTOM_COMMANDS_DIR, { overwrite: false });
+    } else if (dirHasCommands(PACKAGE_COMMANDS_DIR)) {
+      copyDirRecursive(PACKAGE_COMMANDS_DIR, CUSTOM_COMMANDS_DIR, { overwrite: false });
+    }
+  }
+
+  if (!fileExists(CUSTOM_SETTINGS_FILE)) {
+    if (!copyFileIfMissing(LEGACY_SETTINGS_FILE, CUSTOM_SETTINGS_FILE)) {
+      copyFileIfMissing(PACKAGE_SETTINGS_FILE, CUSTOM_SETTINGS_FILE);
+    }
+  }
+
+  if (!fileExists(CUSTOM_AGENT_MD)) {
+    if (!copyFileIfMissing(LEGACY_AGENT_MD, CUSTOM_AGENT_MD)) {
+      copyFileIfMissing(PACKAGE_AGENT_MD, CUSTOM_AGENT_MD);
+    }
+  }
+
+  if (fs.existsSync(CUSTOM_MEMORY_DIR) && !fileExists(CUSTOM_MEMORY_SETTINGS_FILE)) {
+    if (!copyFileIfMissing(LEGACY_MEMORY_SETTINGS_FILE, CUSTOM_MEMORY_SETTINGS_FILE)) {
+      copyFileIfMissing(PACKAGE_MEMORY_SETTINGS_FILE, CUSTOM_MEMORY_SETTINGS_FILE);
+    }
+  }
+}
+
+const KATANA_ROOT = DATA_ROOT;
+const AGENT_DIR = DATA_ROOT;
+const MEMORY_DIR = CUSTOM_MEMORY_DIR;
+const MEMORY_SETTINGS_FILE = CUSTOM_MEMORY_SETTINGS_FILE;
+const VAULT_SKILLS_DIR = CUSTOM_SKILLS_DIR;
+const COMMANDS_DIR = CUSTOM_COMMANDS_DIR;
+const SETTINGS_FILE = CUSTOM_SETTINGS_FILE;
+const AGENT_MD = CUSTOM_AGENT_MD;
 
 // ─── File Operations ─────────────────────────────────────────
 
@@ -85,15 +227,21 @@ function detectProjectStack() {
 // ─── Vault Skills ────────────────────────────────────────────
 
 function getVaultSkills() {
-  if (!fs.existsSync(VAULT_SKILLS_DIR)) return [];
+  ensureDefaultDataRoot();
+
+  const skillsDir = firstMatch(
+    [VAULT_SKILLS_DIR, LEGACY_SKILLS_DIR, PACKAGE_SKILLS_DIR],
+    dirHasSkills
+  );
+  if (!fs.existsSync(skillsDir)) return [];
 
   const skills = [];
-  const categories = fs.readdirSync(VAULT_SKILLS_DIR, { withFileTypes: true });
+  const categories = fs.readdirSync(skillsDir, { withFileTypes: true });
 
   for (const cat of categories) {
     if (!cat.isDirectory() || cat.name.startsWith('.') || cat.name === '_index.md') continue;
 
-    const catPath = path.join(VAULT_SKILLS_DIR, cat.name);
+    const catPath = path.join(skillsDir, cat.name);
     const entries = fs.readdirSync(catPath, { withFileTypes: true });
 
     for (const entry of entries) {
@@ -114,15 +262,21 @@ function getVaultSkills() {
 }
 
 function getVaultCategories() {
-  if (!fs.existsSync(VAULT_SKILLS_DIR)) return [];
+  ensureDefaultDataRoot();
+
+  const skillsDir = firstMatch(
+    [VAULT_SKILLS_DIR, LEGACY_SKILLS_DIR, PACKAGE_SKILLS_DIR],
+    dirHasSkills
+  );
+  if (!fs.existsSync(skillsDir)) return [];
 
   const categories = [];
-  const entries = fs.readdirSync(VAULT_SKILLS_DIR, { withFileTypes: true });
+  const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
 
   for (const entry of entries) {
     if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
 
-    const catPath = path.join(VAULT_SKILLS_DIR, entry.name);
+    const catPath = path.join(skillsDir, entry.name);
     const skills = fs.readdirSync(catPath, { withFileTypes: true })
       .filter(e => e.isDirectory())
       .filter(e => fs.existsSync(path.join(catPath, e.name, 'SKILL.md')));
@@ -141,24 +295,35 @@ function getVaultCategories() {
 }
 
 function getVaultCommands() {
-  if (!fs.existsSync(COMMANDS_DIR)) return [];
-  return fs.readdirSync(COMMANDS_DIR)
+  ensureDefaultDataRoot();
+
+  const commandsDir = firstMatch(
+    [COMMANDS_DIR, LEGACY_COMMANDS_DIR, PACKAGE_COMMANDS_DIR],
+    dirHasCommands
+  );
+  if (!fs.existsSync(commandsDir)) return [];
+
+  return fs.readdirSync(commandsDir)
     .filter(f => f.endsWith('.md'))
     .map(f => ({
       name: f.replace('.md', ''),
-      path: path.join(COMMANDS_DIR, f),
+      path: path.join(commandsDir, f),
     }));
 }
 
 module.exports = {
+  DATA_ROOT,
   KATANA_ROOT,
   AGENT_DIR,
   MEMORY_DIR,
+  MEMORY_SETTINGS_FILE,
   VAULT_SKILLS_DIR,
   COMMANDS_DIR,
   SETTINGS_FILE,
+  PATH_LABELS,
   copyDirRecursive,
   ensureDir,
+  ensureDefaultDataRoot,
   detectProjectStack,
   getVaultSkills,
   getVaultCategories,

@@ -2,15 +2,15 @@
 # ============================================================================
 # Katana Agent — Setup Script
 # ============================================================================
-# Run this from any CLI agent: "run ~/katana-agent/setup.sh"
-# Or run directly: bash ~/katana-agent/setup.sh
+# Run directly from this package directory: bash ./setup.sh
+# Or use the CLI after linking/installing globally: katana memory init
 #
 # This script:
 # 1. Verifies katana-agent installation
 # 2. Checks Node.js and npm
 # 3. Installs dependencies if needed
 # 4. Links the CLI command globally
-# 5. Verifies the agent/ folder structure
+# 5. Ensures the ~/.katana data folder exists
 # 6. Reports what skills and commands are available
 # 7. Outputs instructions for the agent to continue setup
 # ============================================================================
@@ -18,7 +18,11 @@
 set -e
 
 KATANA_ROOT="$(cd "$(dirname "$0")" && pwd)"
-AGENT_DIR="$KATANA_ROOT/agent"
+DATA_ROOT="$HOME/.katana"
+MEMORY_DIR="$DATA_ROOT/memory"
+COMMANDS_DIR="$DATA_ROOT/commands"
+SKILLS_DIR="$MEMORY_DIR/skills"
+SETTINGS_FILE="$DATA_ROOT/settings.json"
 
 echo ""
 echo "⚡ Katana Agent — Setup"
@@ -77,57 +81,62 @@ else
   echo "⚠️  'katana' not in PATH. Use: node $KATANA_ROOT/bin/katana.js"
 fi
 
-# ─── Step 5: Verify agent/ folder ─────────────────────────
+# ─── Step 5: Ensure ~/.katana exists ───────────────────────
 echo ""
-echo "📂 Checking agent folder..."
+echo "🗂  Initializing ~/.katana data folder..."
+cd "$KATANA_ROOT" && node ./bin/katana.js memory init >/dev/null 2>&1 || true
+
+# ─── Step 6: Verify ~/.katana folder ───────────────────────
+echo ""
+echo "📂 Checking ~/.katana folder..."
 
 MISSING=0
 
-if [ ! -d "$AGENT_DIR" ]; then
-  echo "❌ agent/ folder missing"
+if [ ! -d "$DATA_ROOT" ]; then
+  echo "❌ ~/.katana folder missing"
   MISSING=1
 else
-  echo "✅ agent/ exists"
+  echo "✅ ~/.katana exists"
 
-  if [ -d "$AGENT_DIR/memory/core" ]; then
+  if [ -d "$MEMORY_DIR/core" ]; then
     echo "  ✅ memory/core/ (soul.md, user.md, routines.md)"
   else
     echo "  ❌ memory/core/ missing"
     MISSING=1
   fi
 
-  if [ -d "$AGENT_DIR/commands" ]; then
-    CMD_COUNT=$(find "$AGENT_DIR/commands" -name "*.md" | wc -l | tr -d ' ')
+  if [ -d "$COMMANDS_DIR" ]; then
+    CMD_COUNT=$(find "$COMMANDS_DIR" -name "*.md" | wc -l | tr -d ' ')
     echo "  ✅ commands/ ($CMD_COUNT agents)"
   else
     echo "  ❌ commands/ missing"
     MISSING=1
   fi
 
-  if [ -d "$AGENT_DIR/skills" ]; then
-    SKILL_COUNT=$(find "$AGENT_DIR/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    CAT_COUNT=$(find "$AGENT_DIR/skills" -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' ')
+  if [ -d "$SKILLS_DIR" ]; then
+    SKILL_COUNT=$(find "$SKILLS_DIR" -name "SKILL.md" | wc -l | tr -d ' ')
+    CAT_COUNT=$(find "$SKILLS_DIR" -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' ')
     echo "  ✅ skills/ ($SKILL_COUNT skills in $CAT_COUNT categories)"
   else
     echo "  ❌ skills/ missing"
     MISSING=1
   fi
 
-  if [ -f "$AGENT_DIR/settings.json" ]; then
+  if [ -f "$SETTINGS_FILE" ]; then
     echo "  ✅ settings.json"
   else
     echo "  ⚠️  settings.json missing (will use bundled default)"
   fi
 fi
 
-# ─── Step 6: List what's available ────────────────────────
+# ─── Step 7: List what's available ────────────────────────
 echo ""
 echo "═══════════════════════════════════════"
 echo "  AGENT COMMANDS"
 echo "═══════════════════════════════════════"
 
-if [ -d "$AGENT_DIR/commands" ]; then
-  for f in "$AGENT_DIR/commands"/*.md; do
+if [ -d "$COMMANDS_DIR" ]; then
+  for f in "$COMMANDS_DIR"/*.md; do
     [ -f "$f" ] || continue
     NAME=$(basename "$f" .md)
     if [ "$NAME" = "katana" ]; then
@@ -143,8 +152,8 @@ echo "════════════════════════�
 echo "  SKILL CATEGORIES"
 echo "═══════════════════════════════════════"
 
-if [ -d "$AGENT_DIR/skills" ]; then
-  for dir in "$AGENT_DIR/skills"/*/; do
+if [ -d "$SKILLS_DIR" ]; then
+  for dir in "$SKILLS_DIR"/*/; do
     [ -d "$dir" ] || continue
     CAT_NAME=$(basename "$dir")
     SKILLS=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
@@ -153,13 +162,13 @@ if [ -d "$AGENT_DIR/skills" ]; then
   done
 fi
 
-# ─── Step 7: User profile check ──────────────────────────
+# ─── Step 8: User profile check ──────────────────────────
 echo ""
 echo "═══════════════════════════════════════"
 echo "  USER PROFILE"
 echo "═══════════════════════════════════════"
 
-USER_MD="$AGENT_DIR/memory/core/user.md"
+USER_MD="$MEMORY_DIR/core/user.md"
 if [ -f "$USER_MD" ]; then
   LINES=$(wc -l < "$USER_MD" | tr -d ' ')
   if [ "$LINES" -gt 10 ]; then
@@ -172,7 +181,7 @@ else
   echo "  ❌ user.md not found"
 fi
 
-# ─── Step 8: Next steps ──────────────────────────────────
+# ─── Step 9: Next steps ──────────────────────────────────
 echo ""
 echo "═══════════════════════════════════════"
 echo "  NEXT STEPS"
@@ -185,13 +194,13 @@ if [ "$MISSING" -eq 1 ]; then
 fi
 
 echo "  1. Fill in your user profile:"
-echo "     Edit: $AGENT_DIR/memory/core/user.md"
+echo "     Edit: $MEMORY_DIR/core/user.md"
 echo ""
 echo "  2. Open memory vault in Obsidian:"
-echo "     Open folder → $AGENT_DIR/memory/"
+echo "     Open folder → $MEMORY_DIR/"
 echo ""
 echo "  3. Configure skills (API keys, etc):"
-echo "     Tell your agent: 'Read $AGENT_DIR/skills/agents/installer/SKILL.md"
+echo "     Tell your agent: 'Read $SKILLS_DIR/agents/installer/SKILL.md"
 echo "     and walk me through setup'"
 echo ""
 echo "  4. Install into a project:"
